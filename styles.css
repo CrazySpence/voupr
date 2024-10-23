@@ -1,0 +1,420 @@
+/***************
+***   Divs   ***
+***************/
+body
+{
+    font-family: Verdana;
+	background: #1F3D47;
+	color: white;
+}
+
+div.body
+{
+	width: 740px;
+	margin: 0px auto;
+	font-family: Verdana, Arial;
+	font-size: 84%;
+	font-color: white;
+}
+
+div.content
+{
+	background-image: url("images/page-background.jpg");
+	border: 1px solid #6C6C6C;
+	border-radius: 5px;
+	padding: 10px;
+}
+
+div.inline { display: inline; }
+
+div.infobox
+{
+	background-image: url("images/div-background.png");
+	max-width: 335px;
+	margin: 10px 5px;
+	margin-top: 0px;
+	border: 1px solid #6C6C6C;
+	padding: 5px;
+}
+
+div.col { width: 349px; }
+div.sidebar { max-width: 280px; }
+div.floatright { float: right; }
+div.floatleft { float: left; }
+.fullwidth { width: 100%; }
+
+div.navbar
+{
+	background-image: url("images/background3.png");
+	border: 1px solid #6C6C6C;
+	border-radius: 5px;
+	padding: 10px 5px 5px;
+	margin: -11px 0px 10px;
+	font-size: 90%
+}
+
+div.navbar form
+{
+	display: inline;
+}
+
+div.creditbar
+{
+	padding: 5px;
+	text-align: center;
+	font-size: 80%;
+}
+
+div.creditbar div.break
+{
+	display: inline;
+	margin-left: 20px;
+	margin-right: 20px;
+}
+
+div.adbar
+{
+	margin-top: 50px;
+	text-align: center;
+}
+div.ad { padding-top: 10px; }
+#div.ad1 iframe { opacity: 0.4; }
+#div.ad2 iframe { opacity: 0.14; }
+#div.ad3 iframe { opacity: 0.05; }
+
+div.right
+{
+	padding-bottom: 5px;
+	text-align: right;
+	font-size: 90%;
+}
+
+div.plugindesc
+{
+	text-align: center;
+	font-style: italic;
+}
+
+div.main
+{
+	float: left;
+	width: 430px;
+}
+
+div.logininfo, div.registerinfo, div.plugininfo, div.versioninfo
+{
+	float: left;
+	width: 340px;
+}
+
+div.warning
+{
+	margin-top: 10px;
+	margin-bottom: 10px;
+	color: red;
+	font-style: italic;
+}
+
+div.info, div.links, div.login, div.register, div.newplugin, div.newversion
+{
+	background-image: url("images/div-background.png");
+	float: right;
+	max-width: 340px;
+	border: 1px solid #6C6C6C;
+	padding: 5px;
+}
+
+div.info
+{
+	width: 240px;
+}
+
+div.error, div.loginerror, div.registererror, div.pluginerror, div.versionerror
+{
+	color: red;
+	margin-bottom: 10px;
+}
+
+div.success
+{
+	color: #22aa22;
+	font-weight: bold;
+	margin-bottom: 10px;
+}
+
+div.description
+{
+	font-style: italic;
+	margin-bottom: 30px;
+}
+
+div.longdesc
+{
+	background-image: url("images/bg-dark.png");
+	border: 1px dashed #6C6C6C;
+	margin-bottom: 30px;
+	padding: 5px;
+	font-family: courier;
+}
+
+div.editbutton
+{
+	float: right;
+	font-size: 80%;
+}
+
+div.creditbox
+{
+	padding: 5px;
+	font-size: 80%;
+	font-style: courier;
+	font-weight: bold;
+	opacity: 0.3;
+}
+
+
+
+/*****************
+***   Styles   ***
+*****************/
+
+newversion
+{
+	color: #22aa22;
+}
+
+oldversion
+{
+	color: #aa2222;
+}
+
+fancy
+{
+    font-family: Copperplate, "Copperplate Gothic Light";
+    font-style: italic;
+    font-size: 9pt;
+}
+
+
+
+/******************
+***   Headers   ***
+******************/
+
+h1, h2, h3
+{
+	text-align: center;
+}
+
+h4
+{
+	margin-bottom: 5px;
+}
+
+h4.firsth { margin-top: 0px; }
+
+
+
+/****************
+***   Links   ***
+****************/
+a:visited {  }
+a:active {  }
+a { color: #1090df;  font-weight: bold; }
+a:hover { color: #0875b0; }
+
+a.navlink:visited {  }
+a.navlink:active {  }
+a.navlink { color: #00FFE3; font-weight: bold; text-decoration: none; }
+a.navlink:hover { text-decoration:underline; }
+
+a.constant:visited {  }
+a.constant:active {  }
+a.constant { color: #00FFE3; font-weight: bold; text-decoration: none; }
+a.constant:hover { text-decoration: underline; }
+
+a.oldversion { color: #aa2222; }
+a.oldversion:hover { color: #882222; }
+a.newversion { color: #22aa22; }
+a.newversion:hover { color: #228822; }
+
+a.delete { color: #ff2222; }
+a.new { color: #22ff22; }
+
+a.sort { color: #ffffff; text-decoration: none; }
+a.sort:hover { text-decoration: underline; }
+
+a.author { color: white; text-decoration: none; }
+a.author:hover { text-decoration: underline; }
+
+
+
+/*****************
+***   Tables   ***
+*****************/
+table
+{
+	font-size: 90%;
+	border-collapse: collapse;
+}
+
+table.pluginlist
+{
+}
+
+tr.heading td
+{
+	background-image: url("images/table-header.png");
+	font-weight: bold;
+}
+
+td
+{
+	border: 1px solid #555555;
+	padding: 5px;
+}
+
+td.number
+{
+	text-align: right;
+}
+
+td.center
+{
+	text-align: center;
+}
+
+table.navbar
+{
+	width: 100%;
+	border-collapse: collapse;
+}
+
+table.navbar td
+{
+	border: none;
+	text-align: right;
+}
+
+table.navbar td.first { text-align: left; }
+table.navbar td.spacer { width: 50px; text-align: right; }
+table.navbar td.spacerone { text-align: center; }
+
+table.newstable
+{
+	margin-left: 20px;
+}
+table.newstable td
+{
+	border: none;
+}
+table.newstable td.timestamp { opacity: 0.5; text-align: right; font-style: italic; }
+
+
+
+/**********************
+***   Input Forms   ***
+**********************/
+form.inline { display: inline; }
+
+form.contained { margin: 0px; }
+
+input, textarea, select { border: 1px solid #6C6C6C; font-size: 100%; }
+
+table.input, table.info { border: none; }
+table.input td, table.info td { border: none; }
+
+table.input td.label, table.info td.label
+{
+	color: #aaaaaa;
+	width: 89px;
+}
+
+table.input td.info
+{
+}
+
+table.input td.input
+{
+}
+
+table.input td.input input, textarea
+{
+	border: 1px solid #6C6C6C;
+	width: 200px;
+	font-size: 100%;
+}
+
+table.input td.input textarea
+{
+	height: 100px;
+}
+
+table.input td.submit
+{
+	text-align: center;
+}
+
+div.submit
+{
+	margin-top: 5px;
+	text-align: center;
+}
+
+div.navbar input.searchfield
+{
+	font-size: 100%;
+}
+
+input.username
+{
+	width: 100px;
+}
+
+table.addlink { margin: 0px; margin-bottom: 10px; }
+table.addlink td { border: none; padding: 0px; }
+table.addlink td.label { color: #aaaaaa; }
+table.addlink td.input input { width: 200px; }
+
+
+
+/*****************
+***   Images   ***
+*****************/
+img.choosestar
+{
+	cursor: hand;
+	height: 16px;
+	padding: 4px;
+	margin: -4px;
+}
+
+img.thumbnail
+{
+	cursor: hand;
+	height: 96px;
+	width: 128px;
+	margin: 2px;
+}
+
+img.plusicon
+{
+	cursor: hand;
+	position: relative;
+	top: 3px;
+}
+
+div.picbox
+{
+	margin-top: 10px;
+	text-align: center;
+}
+
+div.screenshots
+{
+	background-image: url("images/bg-dark.png");
+	margin-bottom: 20px;
+	border: 1px solid #6C6C6C;
+	border-radius: 5px;
+	padding: 5px;
+}
