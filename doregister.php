@@ -39,8 +39,8 @@
 		$mail->isSMTP();
 		$mail->Host = 'smtp.mail.me.com';
 		$mail->SMTPAuth = true;
-		$mail->Username = 'commodorespence@icloud.com';
-		$mail->Password = 'xoav-gxnz-imhw-bvzf';
+		$mail->Username = '';
+		$mail->Password = '';
 		$mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
 		$mail->Port = 587;
                 $mail->setFrom('wiki-auto@vo-wiki.com','VOUPR Registration');
