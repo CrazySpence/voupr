@@ -1,3 +1,8 @@
+on:
+  push:
+    branches:
+      - main
+steps:
 - name: Checkout
   uses: actions/checkout@v4
 - name: SFTP upload
@@ -8,4 +13,4 @@
     password: ${{secrets.sftp_password}}
     port: 22
     uploads: |
-    ./ => ${{secrets.sftp_path}} 
+      ./ => ${{secrets.sftp_path}} 
