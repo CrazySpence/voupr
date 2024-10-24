@@ -2,7 +2,7 @@
 
 <?
 	// Get search and sort
-	$author = mysqli_real_escape_string($_GET['author']);
+	$author = mysqli_real_escape_string($db,$_GET['author']);
 	$sort = 'longname ASC';
 	if ($_GET['sort'] == 'name') { $sort = 'longname ASC'; }
 	if ($_GET['sort'] == 'rating') { $sort = 'rating DESC'; }
@@ -30,7 +30,7 @@
 			<td>Description</td>
 		</tr>
 		
-		<? while($row = mysql_fetch_array($result)) { ?>
+		<? while($row = mysqli_fetch_array($result)) { ?>
 			<tr>
 				<td><a href="plugin.php?name=<?=$row['name']?>"><?=desafe($row['longname'])?></a></td>
 				<td><?=printrating($row['rating'])?></td>

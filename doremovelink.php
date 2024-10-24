@@ -6,7 +6,7 @@
 
 <?
 	// Get form variables
-	$id = mysql_real_escape_string($_GET['id']);
+	$id = mysqli_real_escape_string($db,$_GET['id']);
 	
 	// Get plugin
 	$query = 'SELECT plugin FROM links WHERE id="'.$id.'"';
