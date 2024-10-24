@@ -1,15 +1,18 @@
-on:
-  push:
-    branches:
-      - main
-- name: Checkout
-  uses: actions/checkout@v4
-- name: SFTP upload
-  uses: Dylan700/sftp-upload-action@latest
-  with:
-    server: ${{secrets.sftp_host}}
-    username: ${{secrets.sftp_user}}
-    password: ${{secrets.sftp_password}}
-    port: 22
-    uploads: |
-      ./ => ${{secrets.sftp_path}} 
+name: Upload voupr commits to dev site
+on: [push]
+
+jobs:
+  Upload-to-SFTP:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: SFTP upload
+        uses: Dylan700/sftp-upload-action@latest
+        with:
+            server: ${{secrets.sftp_host}}
+            username: ${{secrets.sftp_user}}
+            password: ${{secrets.sftp_password}}
+            port: 22
+            uploads: |
+              ./ => ${{secrets.sftp_path}} 
