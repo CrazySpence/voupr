@@ -1,12 +1,10 @@
 <?php
 require "headerdata.php";
+require "../secrets.inc";
 $page_title = "Vendetta Activity Monitor";
 require "header.php";
 $closespan = 0;
-$sqlserver = "localhost";
-$sqluser   = "";
-$sqlpass   = "";
-$fp = mysqli_connect($sqlserver,$sqluser,$sqlpass,"");
+$fp = mysqli_connect($sqlserver,$sqluser,$sqlpass,"relaydb");
 ?>
 <meta http-equiv="refresh" content="30; URL=https://voupr.spenced.com/active.php">
 
@@ -164,7 +162,7 @@ function irc2html($data) {
 }
 
 function voOnline() {
-    $db = mysqli_connect("localhost","","","");	
+    $db = mysqli_connect($sqlserver,$vosqluser,$vosqlpass,"vendetta_online");	
     $sql = "SELECT user from user_tracker WHERE (DATE_SUB(NOW(), INTERVAL 1440 MINUTE)) <= seen";
     $result = mysqli_query($db,$sql);
     $count = mysqli_num_rows($result);

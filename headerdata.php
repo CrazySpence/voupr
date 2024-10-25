@@ -1,5 +1,5 @@
 <?
 	$page_title = TRUE;
 	require('userauth.php');
-	$SERVER = 'https://voupr.spenced.com/';
+	$SERVER = $_SERVER['SERVER_NAME'];
 ?>
