@@ -4,22 +4,22 @@
 <div class="navbar">
 	<table class="navbar"><tr>
 		<td class="first">
-			<a class="navlink" href="<?=$SERVER?>.">Home</a> |
-			<a class="navlink" href="<?=$SERVER?>list.php">List</a> |
-			<a class="navlink" href="<?=$SERVER?>userplugins.php">My Plugins</a> |
-			<a class="navlink" href="<?=$SERVER?>upload.php">Upload</a> |
-                        <a class="navlink" href="<?=$SERVER?>active.php">In Game</a>
+			<a class="navlink" href=".">Home</a> |
+			<a class="navlink" href="list.php">List</a> |
+			<a class="navlink" href="userplugins.php">My Plugins</a> |
+			<a class="navlink" href="upload.php">Upload</a> |
+                        <a class="navlink" href="active.php">In Game</a>
 		</td>
 		<td class="spacerone">&#183</td>
 		<? if ($user_loggedin) { ?>
 			<td>
-				<a class="navlink" href="<?=$SERVER?>settings.php">Settings</a> |
-				<a class="navlink" href="<?=$SERVER?>logout.php">Sign out</a>
+				<a class="navlink" href="settings.php">Settings</a> |
+				<a class="navlink" href="logout.php">Sign out</a>
 			</td>
 		<? } else { ?>
 			<td>
-				<a class="navlink" href="<?=$SERVER?>login.php">Sign in</a> or
-				<a class="navlink" href="<?=$SERVER?>register.php">Register</a>
+				<a class="navlink" href="login.php">Sign in</a> or
+				<a class="navlink" href="register.php">Register</a>
 			</td>
 		<? } ?>
 		<td class="spacer">&#183</td>
