@@ -162,6 +162,9 @@ function irc2html($data) {
 }
 
 function voOnline() {
+    global $sqlserver;
+    global $vosqluser;
+    global $vosqlpass;    
     $db = mysqli_connect($sqlserver,$vosqluser,$vosqlpass,"vendetta_online");	
     $sql = "SELECT user from user_tracker WHERE (DATE_SUB(NOW(), INTERVAL 1440 MINUTE)) <= seen";
     $result = mysqli_query($db,$sql);
