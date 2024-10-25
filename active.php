@@ -6,7 +6,7 @@ require "header.php";
 $closespan = 0;
 $fp = mysqli_connect($sqlserver,$sqluser,$sqlpass,"relaydb");
 ?>
-<meta http-equiv="refresh" content="30; URL=https://voupr.spenced.com/active.php">
+	<meta http-equiv="refresh" content="30; URL=active.php">
 
 <?php
 
