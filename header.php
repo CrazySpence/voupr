@@ -7,7 +7,7 @@
 <html>
 <head>
 	<title><?=$page_title?></title>
-	<link type="text/css" rel="stylesheet" href="https://voupr.spenced.com/styles.css">
+	<link type="text/css" rel="stylesheet" href="https://<?php echo $SERVER ?>/styles.css">
 </head>
 	<script type="text/javascript">
 		var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
