@@ -10,6 +10,8 @@
         use PHPMailer\PHPMailer\SMTP;
         use PHPMailer\PHPMailer\Exception;
         require 'vendor/autoload.php';
+	csrf_verify();
+
 	// Get form variables
 	$username = strtolower($_POST['username']);
 	$email = strtolower($_POST['email']);

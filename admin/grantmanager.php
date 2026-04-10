@@ -17,6 +17,7 @@
 <div class="sidebar floatright">
 	<div class="infobox">
 		<form name="grantmanager" method="post" action="dograntmanager.php">
+			<input type="hidden" name="csrf_token" value="<?=$_SESSION['csrf_token']?>">
 			<? if ($_GET['badplugin']) { ?>
 				<div class="error">
 					Plugin does not exist.

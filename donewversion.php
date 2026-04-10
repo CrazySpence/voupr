@@ -5,6 +5,8 @@
 <? require('utilities.php'); ?>
 
 <?
+	csrf_verify();
+
 	// Get form variables
 	$plugin = $_POST['plugin'];
 	$file = $_FILES['upload'];

@@ -6,9 +6,11 @@
 <? require('session.php'); ?>
 
 <?
+	csrf_verify();
+
 	// Get form variables
-	$plugin = strtolower($_GET['plugin']);
-	$user = $_GET['user'];
+	$plugin = strtolower($_POST['plugin']);
+	$user = $_POST['user'];
 	
 	// Require login
 	$post_login = 'doremovemanager.php?plugin='.$plugin.'&user='.$user;

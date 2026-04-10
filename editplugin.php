@@ -65,6 +65,7 @@
 		<div class="infobox">
 			<b>Default keys & commands:</b>
 			<form class="contained" name="details" method="post" action="dodetail.php">
+				<input type="hidden" name="csrf_token" value="<?=$_SESSION['csrf_token']?>">
 				<textarea name="longdesc" class="fullwidth" rows=10><?=$longdesc?></textarea>
 				<input type="hidden" name="plugin" value="<?=$plugin?>">
 				<input type="submit">
@@ -76,13 +77,14 @@
 		<div class="infobox">
 			<b>Screenshots</b>
 			<form class="contained" name="screenshots" method="post" action="doscreenshots.php" enctype="multipart/form-data">
+				<input type="hidden" name="csrf_token" value="<?=$_SESSION['csrf_token']?>">
 				<? for ($i = 1; $i<=3; $i++) { ?>
 					<!--Begin Screenshot <?=$i?>-->
 					<? $filepath = 'screenshots/'.$plugin.'-'.$i.'.png'; ?>
 					<? if (file_exists($filepath)) { ?>
 						<div class="picbox">
 							<img class="thumbnail" src="<?=$filepath?>" OnClick="Open('<?=$filepath?>')"></img>
-							<a class="delete" href="doremovescreenshot.php?plugin=<?=$plugin?>&number=<?=$i?>">X</a>
+							<form method="post" action="doremovescreenshot.php" style="display:inline"><input type="hidden" name="csrf_token" value="<?=$_SESSION['csrf_token']?>"><input type="hidden" name="plugin" value="<?=$plugin?>"><input type="hidden" name="number" value="<?=$i?>"><button type="submit" class="delete">X</button></form>
 						</div>
 					<? } else { ?>
 						<!--<div class="picbox"><img class="thumbnail" src="images/empty.png"></img></div>-->
@@ -121,6 +123,7 @@
 				</div>
 			<? } ?>
 			<form name="newplugin" method="post" action="doeditplugin.php" enctype="multipart/form-data">
+				<input type="hidden" name="csrf_token" value="<?=$_SESSION['csrf_token']?>">
 				<table class="input">
 					<tr>
 						<td class="label">Plugin ID:</td>
@@ -169,6 +172,7 @@
 				<div class="inline" id="addlinkform">
 					<li>
 						<form class="inline" name="addlink" method="post" action="doaddlink.php">
+							<input type="hidden" name="csrf_token" value="<?=$_SESSION['csrf_token']?>">
 							<table class="addlink">
 								<tr>
 									<td class="label">Type:</td>
@@ -209,7 +213,7 @@
 						if ($row['type'] == '2') { $type = 'E-mail: '; $link = 'mailto:'.$link; }
 						if ($row['type'] == '3') { $type = 'Thread: '; }
 						echo '<li>'.$type.'<a href="'.$link.'">'.$title.'</a>';
-						echo ' (<a class="delete" href="doremovelink.php?id='.$row['id'].'">X</a>)';
+						echo ' (<form method="post" action="doremovelink.php" style="display:inline"><input type="hidden" name="csrf_token" value="'.$_SESSION['csrf_token'].'"><input type="hidden" name="id" value="'.$row['id'].'"><button type="submit" class="delete">X</button></form>)';
 					}
 				?>
 			</ul>
@@ -225,6 +229,7 @@
 					</div>
 					<div class="inline" id="addmanagerform">:
 						<form class="inline" name="addmanager" method="post" action="doaddmanager.php">
+							<input type="hidden" name="csrf_token" value="<?=$_SESSION['csrf_token']?>">
 							<input type="text" name="newmanager" class="username">
 							<input type="hidden" name="plugin" value="<?=$plugin?>">
 							<input type="image" src="images/plus-16x16.png" style="border: none; position: relative; top: 4px;">
@@ -255,7 +260,7 @@
 					while ($row = mysqli_fetch_array($result))
 					{
 						echo '<li>'.$row['username'];
-						echo ' (<a class="delete" href="doremovemanager.php?plugin='.$plugin.'&user='.$row['username'].'">X</a>)';
+						echo ' (<form method="post" action="doremovemanager.php" style="display:inline"><input type="hidden" name="csrf_token" value="'.$_SESSION['csrf_token'].'"><input type="hidden" name="plugin" value="'.$plugin.'"><input type="hidden" name="user" value="'.$row['username'].'"><button type="submit" class="delete">X</button></form>)';
 					}
 				?>
 			</ul>
@@ -266,6 +271,7 @@
 		<div class="infobox">
 			<b>Authors:</b>
 			<form class="contained" name="authors" method="post" action="doauthors.php">
+				<input type="hidden" name="csrf_token" value="<?=$_SESSION['csrf_token']?>">
 				<input name="authors" class="fullwidth" rows=10 value="<?=$authors?>">
 				<input type="hidden" name="plugin" value="<?=$plugin?>">
 				<input type="submit">

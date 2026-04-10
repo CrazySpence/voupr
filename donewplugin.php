@@ -7,6 +7,8 @@
 <? require('utilities.php'); ?>
 
 <?
+	csrf_verify();
+
 	// Get form variables
 	$pluginname = strtolower($_POST['pluginname']);
 	$dispname = $_POST['displayname'];

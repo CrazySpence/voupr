@@ -6,6 +6,8 @@
 <? require('utilities.php'); ?>
 
 <?
+	csrf_verify();
+
 	// Get form variables
 	$plugin = strtolower($_POST['plugin']);
 	$type = intval($_POST['type']);

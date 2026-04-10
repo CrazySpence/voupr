@@ -6,6 +6,8 @@
 <? require('session.php'); ?>
 
 <?
+	csrf_verify();
+
 	// Get form variables
 	$user = $_POST['newmanager'];
 	$plugin = strtolower($_POST['plugin']);

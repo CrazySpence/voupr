@@ -7,6 +7,8 @@
 <? require('admin.php'); ?>
 
 <?
+	csrf_verify();
+
 	// Get form variables
 	$user = $_POST['user'];
 	$password = $_POST['password'];
