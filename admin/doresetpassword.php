@@ -27,7 +27,7 @@
 		$redirect_url = substr($url, 0, -1);
 		require('../redirect.php');
 	} else {
-		db_run('UPDATE users SET password=? WHERE username=?', 'ss', md5($password), $user);
+		db_run('UPDATE users SET password=? WHERE username=?', 'ss', password_hash($password, PASSWORD_DEFAULT), $user);
 		
 		// Return to page
 		$redirect_url = 'resetpassword.php?success=TRUE';
