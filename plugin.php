@@ -130,11 +130,11 @@
 					<td class="label">My Rating:</td>
 					<td class="info">
 						<div class="choosestarbox" OnMouseOut="MouseOffStar()">
-							<img id="star1" class="choosestar" src="images/star-faded.png" OnMouseOver="MouseOnStar(2)" OnCLick="GoTo('dorating.php?plugin=<?=$name?>&rating=2')"></img>
-							<img id="star2" class="choosestar" src="images/star-faded.png" OnMouseOver="MouseOnStar(4)" OnCLick="GoTo('dorating.php?plugin=<?=$name?>&rating=4')"></img>
-							<img id="star3" class="choosestar" src="images/star-faded.png" OnMouseOver="MouseOnStar(6)" OnCLick="GoTo('dorating.php?plugin=<?=$name?>&rating=6')"></img>
-							<img id="star4" class="choosestar" src="images/star-faded.png" OnMouseOver="MouseOnStar(8)" OnCLick="GoTo('dorating.php?plugin=<?=$name?>&rating=8')"></img>
-							<img id="star5" class="choosestar" src="images/star-faded.png" OnMouseOver="MouseOnStar(10)" OnCLick="GoTo('dorating.php?plugin=<?=$name?>&rating=10')"></img>
+							<img id="star1" class="choosestar" src="images/star-faded.png" OnMouseOver="MouseOnStar(2)" OnCLick="GoTo('dorating.php?plugin=<?=$name?>&rating=2&csrf_token=<?=$_SESSION['csrf_token']?>')"></img>
+							<img id="star2" class="choosestar" src="images/star-faded.png" OnMouseOver="MouseOnStar(4)" OnCLick="GoTo('dorating.php?plugin=<?=$name?>&rating=4&csrf_token=<?=$_SESSION['csrf_token']?>')"></img>
+							<img id="star3" class="choosestar" src="images/star-faded.png" OnMouseOver="MouseOnStar(6)" OnCLick="GoTo('dorating.php?plugin=<?=$name?>&rating=6&csrf_token=<?=$_SESSION['csrf_token']?>')"></img>
+							<img id="star4" class="choosestar" src="images/star-faded.png" OnMouseOver="MouseOnStar(8)" OnCLick="GoTo('dorating.php?plugin=<?=$name?>&rating=8&csrf_token=<?=$_SESSION['csrf_token']?>')"></img>
+							<img id="star5" class="choosestar" src="images/star-faded.png" OnMouseOver="MouseOnStar(10)" OnCLick="GoTo('dorating.php?plugin=<?=$name?>&rating=10&csrf_token=<?=$_SESSION['csrf_token']?>')"></img>
 						</div>
 					</td>
 				</tr>

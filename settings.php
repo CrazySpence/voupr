@@ -35,6 +35,7 @@
 				</div>
 			<? } ?>
 			<form name="changepassword" method="post" action="dochangepassword.php">
+				<input type="hidden" name="csrf_token" value="<?=$_SESSION['csrf_token']?>">
 				<table class="input">
 					<tr>
 						<td class="label">Current:</td>

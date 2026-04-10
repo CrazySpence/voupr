@@ -5,6 +5,8 @@
 <? require('utilities.php'); ?>
 
 <?
+	csrf_verify();
+
 	// Get form variables
 	$id = intval($_POST['id']);
 	$description = $_POST['description'];

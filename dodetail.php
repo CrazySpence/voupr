@@ -3,6 +3,8 @@
 	require('database.php');
 	require('utilities.php');
 
+	csrf_verify();
+
 	// Get form variables
 	$plugin = $_POST['plugin'];
 	$longdesc = $_POST['longdesc'];

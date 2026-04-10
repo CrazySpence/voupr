@@ -70,6 +70,7 @@
 			</div>
 			<div id="changelogform">
 				<form name="editchangelog" method="post" action="doeditversion.php">
+					<input type="hidden" name="csrf_token" value="<?=$_SESSION['csrf_token']?>">
 					<input type="hidden" name="id" value="<?=$versionid?>">
 					<textarea name="description" class="fullwidth" rows=10><?=$descform?></textarea><br>
 					<button type="button" onClick="ChangelogStatic();">Cancel</button>

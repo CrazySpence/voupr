@@ -5,8 +5,10 @@
 <? require('utilities.php'); ?>
 
 <?
+	csrf_verify();
+
 	// Get form variables
-	$id = intval($_GET['id']);
+	$id = intval($_POST['id']);
 	
 	// Get plugin
 	$result = db_run('SELECT plugin FROM links WHERE id=?', 'i', $id);

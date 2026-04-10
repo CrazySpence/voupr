@@ -4,6 +4,8 @@
 <? require('userauth.php'); ?>
 
 <?
+	csrf_verify();
+
 	// Check login
 	$post_login = 'settings.php';
 	require('loggedin.php');

@@ -17,6 +17,7 @@ Clicking "Remember Me" will create a login cookie that lasts one year from the d
 		</div>
 	<? } ?>
 	<form name="login" method="post" action="dologin.php">
+		<input type="hidden" name="csrf_token" value="<?=$_SESSION['csrf_token']?>">
 		<table class="input">
 			<tr>
 				<td class="label">Username:</td>

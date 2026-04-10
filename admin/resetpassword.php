@@ -17,6 +17,7 @@
 <div class="sidebar floatright">
 	<div class="infobox">
 		<form name="resetpassword" method="post" action="doresetpassword.php">
+			<input type="hidden" name="csrf_token" value="<?=$_SESSION['csrf_token']?>">
 			<? if ($_GET['baduser']) { ?>
 				<div class="error">
 					User does not exist.

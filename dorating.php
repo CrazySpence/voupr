@@ -5,6 +5,8 @@
 <? require('session.php'); ?>
 
 <?
+	csrf_verify();
+
 	// Get form variables
 	$plugin = $_GET['plugin'];
 	$rating = intval($_GET['rating']);

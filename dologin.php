@@ -5,6 +5,8 @@
 	require('fullurl.php');
 	require('userauth.php');
 
+	csrf_verify();
+
 	// Get form variables
 	$username = strtolower($_POST['username']);
 	$password = $_POST['password'];

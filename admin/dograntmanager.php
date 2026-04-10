@@ -7,6 +7,8 @@
 <? require('admin.php'); ?>
 
 <?
+	csrf_verify();
+
 	// Get form variables
 	$plugin = strtolower($_POST['plugin']);
 	$user = $_POST['user'];
