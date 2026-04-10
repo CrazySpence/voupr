@@ -5,7 +5,7 @@
 	require('utilities.php');
 
 	// Get form variables
-	$plugin = mysqli_real_escape_string($db,$_GET['plugin']);
+	$plugin = $_GET['plugin'];
 	
 	// Check user login
 	$post_login = 'doremoveplugin.php?plugin='.$plugin;
@@ -22,16 +22,10 @@
 		// Return to page with errors
 		include('404redirect.php');
 	} else {
-		// Set variables
-		$plugin = $plugin;
-		$version = $version;
-		// Update version
-		$query = 'SELECT version FROM installed WHERE user="'.$user_sname.'" AND plugin="'.$plugin.'"';
-		$result = mysqli_query($db,$query);
+		$result = db_run('SELECT version FROM installed WHERE user=? AND plugin=?', 'ss', $user_sname, $plugin);
 		if ($row = mysqli_fetch_array($result))
 		{
-			$query = 'DELETE FROM installed WHERE user="'.$user_sname.'" AND plugin="'.$plugin.'"';
-			mysqli_query($db,$query);
+			db_run('DELETE FROM installed WHERE user=? AND plugin=?', 'ss', $user_sname, $plugin);
 		}
 		
 		// Return to My Plugins page

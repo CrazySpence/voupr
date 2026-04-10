@@ -6,9 +6,9 @@
 	require('userauth.php');
 
 	// Get form variables
-	$username = mysqli_real_escape_string($db,strtolower($_POST['username']));
+	$username = strtolower($_POST['username']);
 	$password = $_POST['password'];
-	$remember = mysqli_real_escape_string($db,$_POST['remember']);
+	$remember = $_POST['remember'];
 	
 	// Check credentials
 	$badlogin = check_login($username, md5($password), $remember);

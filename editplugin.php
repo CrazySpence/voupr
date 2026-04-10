@@ -7,9 +7,8 @@
 
 <?
 	// Get request data
-	$plugin = mysqli_real_escape_string($db,$_GET['plugin']);
-	$query = 'SELECT * FROM plugins WHERE name="'.$plugin.'"';
-	$result = mysqli_query($db,$query);
+	$plugin = $_GET['plugin'];
+	$result = db_run('SELECT * FROM plugins WHERE name=?', 's', $plugin);
 	if (!$row = mysqli_fetch_array($result)) { 
 		require('404redirect.php');
 	} else {
@@ -200,8 +199,7 @@
 					AddLinkHide();
 				</script>
 				<?
-					$query = 'SELECT * FROM links WHERE plugin="'.$plugin.'" ORDER BY title ASC';
-					$result = mysqli_query($db,$query);
+					$result = db_run('SELECT * FROM links WHERE plugin=? ORDER BY title ASC', 's', $plugin);
 					while ($row = mysqli_fetch_array($result))
 					{
 						$link = $row['link'];
@@ -253,8 +251,7 @@
 			<? } ?>
 			<ul>
 				<?
-					$query = 'SELECT username FROM managers WHERE pluginname="'.$plugin.'" ORDER BY username ASC';
-					$result = mysqli_query($db,$query);
+					$result = db_run('SELECT username FROM managers WHERE pluginname=? ORDER BY username ASC', 's', $plugin);
 					while ($row = mysqli_fetch_array($result))
 					{
 						echo '<li>'.$row['username'];

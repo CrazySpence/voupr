@@ -8,18 +8,17 @@
 
 <?
 	// Get form variables
-	$pluginname = mysqli_real_escape_string($db,strtolower($_POST['pluginname']));
-	$dispname = mysqli_real_escape_string($db,$_POST['displayname']);
-	$description = mysqli_real_escape_string($db,$_POST['description']);
+	$pluginname = strtolower($_POST['pluginname']);
+	$dispname = $_POST['displayname'];
+	$description = $_POST['description'];
 	$file = $_FILES['upload'];
-	$version = mysqli_real_escape_string($db,$_POST['version']);
+	$version = $_POST['version'];
 	
 	// Check plugin name
 	if (strlen($pluginname) == 0) { $badpluginname = TRUE; }
 	else
 	{
-		$query = 'SELECT * FROM plugins WHERE name="'.$pluginname.'"';
-		$result = mysqli_query($db,$query);
+		$result = db_run('SELECT * FROM plugins WHERE name=?', 's', $pluginname);
 		if (mysqli_fetch_array($result)) { $badpluginname = TRUE; }
 	}
 	if (strpos($pluginname, " ")) { $pluginnamehasspace = TRUE; }
@@ -28,8 +27,7 @@
 	if (strlen($dispname) == 0) { $baddispname = TRUE; }
 	else
 	{
-		$query = 'SELECT name FROM plugins WHERE LOWER(longname)=LOWER("'.$dispname.'") LIMIT 1';
-		$result = mysqli_query($db,$query);
+		$result = db_run('SELECT name FROM plugins WHERE LOWER(longname)=LOWER(?) LIMIT 1', 's', $dispname);
 		if (mysqli_fetch_array($result)) { $baddispname = TRUE; }
 	}
 	
@@ -64,12 +62,7 @@
 		$redirect_url = substr($url, 0, -1);
 		include('redirect.php');
 	} else {
-		// Set variables
 		$name = $pluginname;
-		$longname = $dispname;
-		$description = $description;
-		$version = $version;
-		$file = $file;
 		// Upload file
 		$path = 'downloads/'.$name.'-'.$version.'.zip';
 		if (!move_uploaded_file($file['tmp_name'], $path))
@@ -77,18 +70,14 @@
 		chmod($path, 0644);
 		// Create plugin
 		// Add plugin
-		$query = 'INSERT INTO plugins (name, longname, description, authors) VALUES ("'.$name.'", "'.$longname.'", "'.$description.'", "'.getuserdispname($user_sname).'")';
-		mysqli_query($db,$query);
+		db_run('INSERT INTO plugins (name, longname, description, authors) VALUES (?, ?, ?, ?)', 'ssss', $name, $dispname, $description, getuserdispname($user_sname));
 		// Add manager
-		$query = 'INSERT INTO managers (username, pluginname) VALUES ("'.$user_sname.'", "'.$name.'")';
-		mysqli_query($db,$query);
+		db_run('INSERT INTO managers (username, pluginname) VALUES (?, ?)', 'ss', $user_sname, $name);
 		// Add version
-		$query = 'INSERT INTO versions (plugin, versionstring, timestamp, description) VALUES ("'.$name.'", "'.$version.'", NOW(), "Initial upload.")';
-		mysqli_query($db,$query);
+		db_run('INSERT INTO versions (plugin, versionstring, timestamp, description) VALUES (?, ?, NOW(), "Initial upload.")', 'ss', $name, $version);
 		// Add to user's plugins
 		$id = getversionid($name, $version);
-		$query = 'INSERT INTO installed (user, plugin, version) VALUES ("'.$user_sname.'", "'.$name.'", "'.$id.'")';
-		mysqli_query($db,$query);
+		db_run('INSERT INTO installed (user, plugin, version) VALUES (?, ?, ?)', 'ssi', $user_sname, $name, $id);
 		
 		// Redirect to plugin page
 		$redirect_url = 'plugin.php?name='.$name;

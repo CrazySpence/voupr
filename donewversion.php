@@ -6,10 +6,10 @@
 
 <?
 	// Get form variables
-	$plugin = mysqli_real_escape_string($db,$_POST['plugin']);
+	$plugin = $_POST['plugin'];
 	$file = $_FILES['upload'];
-	$version = mysqli_real_escape_string($db,$_POST['version']);
-	$description = mysqli_real_escape_string($db,$_POST['description']);
+	$version = $_POST['version'];
+	$description = $_POST['description'];
 	
 	// Check plugin name
 	if (!pluginexists($plugin)) { error('Plugin does not exist'); }
@@ -28,8 +28,7 @@
 	if (strlen($version) == 0) { $badversion = TRUE; }
 	else
 	{
-		$query = 'SELECT plugin FROM versions WHERE plugin="'.$plugin.'" AND LOWER(versionstring)=LOWER("'.$version.'") LIMIT 1';
-		$result = mysqli_query($db,$query);
+		$result = db_run('SELECT plugin FROM versions WHERE plugin=? AND LOWER(versionstring)=LOWER(?) LIMIT 1', 'ss', $plugin, $version);
 		if (mysqli_fetch_array($result)) { $dupversion = TRUE; }
 	}
 ?>
@@ -51,25 +50,16 @@
 		$redirect_url = substr($url, 0, -1);
 		require('redirect.php');
 	} else {
-		// Set variables
-		$plugin = $plugin;
-		$file = $file;
-		$version = $version;
-		$description = $description;
 		// Upload file
 		$path = 'downloads/'.$plugin.'-'.$version.'.zip';
 		if (!move_uploaded_file($file['tmp_name'], $path))
 			{ die('Error uploading file!'); }
 		chmod($path, 0644);
 		// Add version
-		$query = 'INSERT INTO versions (plugin, versionstring, timestamp, description) VALUES ("'.$plugin.'", "'.$version.'", NOW(), "'.$description.'")';
-		mysqli_query($db,$query);
-		
+		db_run('INSERT INTO versions (plugin, versionstring, timestamp, description) VALUES (?, ?, NOW(), ?)', 'sss', $plugin, $version, $description);
+
 		// Go to version page
-		$query = 'SELECT id FROM versions WHERE plugin="'.$plugin.'" AND versionstring="'.$version.'"';
-		$result = mysqli_query($db,$query);
-		$row = mysqli_fetch_array($result);
-		$id = $row['id'];
+		$id = getversionid($plugin, $version);
 		$redirect_url = 'version.php?id='.$id.'';
 		require('redirect.php');
 	}

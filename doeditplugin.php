@@ -7,9 +7,9 @@
 
 <?
 	// Get form variables
-	$plugin = mysqli_real_escape_string($db,strtolower($_POST['plugin']));
-	$dispname = mysqli_real_escape_string($db,$_POST['displayname']);
-	$description = mysqli_real_escape_string($db,$_POST['description']);
+	$plugin = strtolower($_POST['plugin']);
+	$dispname = $_POST['displayname'];
+	$description = $_POST['description'];
 	
 	// Require login
 	$post_login = 'editplugin.php?plugin='.$plugin;
@@ -19,8 +19,7 @@
 	if (strlen($plugin) == 0) { $badpluginname = TRUE; }
 	else
 	{
-		$query = 'SELECT name FROM plugins WHERE name="'.$plugin.'"';
-		$result = mysqli_query($db,$query);
+		$result = db_run('SELECT name FROM plugins WHERE name=?', 's', $plugin);
 		if (!mysqli_fetch_array($result)) { require('404redirect.php'); }
 	}
 	
@@ -31,8 +30,7 @@
 	if (strlen($dispname) == 0) { $baddispname = TRUE; }
 	else
 	{
-		$query = 'SELECT name FROM plugins WHERE LOWER(longname)=LOWER("'.$dispname.'") AND name!="'.$plugin.'" LIMIT 1';
-		$result = mysqli_query($db,$query);
+		$result = db_run('SELECT name FROM plugins WHERE LOWER(longname)=LOWER(?) AND name!=? LIMIT 1', 'ss', $dispname, $plugin);
 		if (mysqli_fetch_array($result)) { $baddispname = TRUE; }
 	}
 ?>
@@ -50,13 +48,7 @@
 		$redirect_url = substr($url, 0, -1);
 		require('redirect.php');
 	} else {
-		// Set variables
-		$plugin = $plugin;
-		$longname = $dispname;
-		$description = $description;
-		// Update plugin info
-		$query = 'UPDATE plugins SET longname="'.$longname.'", description="'.$description.'" WHERE name="'.$plugin.'"';
-		mysqli_query($db,$query);
+		db_run('UPDATE plugins SET longname=?, description=? WHERE name=?', 'sss', $dispname, $description, $plugin);
 		
 		// Redirect
 		$redirect_url = 'editplugin.php?plugin='.$plugin;

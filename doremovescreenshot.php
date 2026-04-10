@@ -6,7 +6,7 @@
 
 <?
 	// Get form variables
-	$plugin = mysqli_real_escape_string($db,$_GET['plugin']);
+	$plugin = $_GET['plugin'];
 	$number = intval($_GET['number']);
 	
 	// Check plugin name

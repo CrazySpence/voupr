@@ -4,8 +4,8 @@
 	require('utilities.php');
 
 	// Get form variables
-	$plugin = mysql_real_escape_string($_POST['plugin']);
-	$authors = mysql_real_escape_string($_POST['authors']);
+	$plugin = $_POST['plugin'];
+	$authors = $_POST['authors'];
 	
 	// Check plugin name
 	if (!pluginexists($plugin)) { error('Plugin does not exist'); }
@@ -20,8 +20,7 @@
 	
 	
 	// Do stuff
-	$query = 'UPDATE plugins SET authors="'.$authors.'" WHERE name="'.$plugin.'"';
-	mysqli_query($db,$query);
+	db_run('UPDATE plugins SET authors=? WHERE name=?', 'ss', $authors, $plugin);
 	
 	// Go to plugin page
 	$redirect_url = 'editplugin.php?plugin='.$plugin.'';

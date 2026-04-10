@@ -7,8 +7,8 @@
 
 <?
 	// Get form variables
-	$user = mysql_real_escape_string($_POST['newmanager']);
-	$plugin = mysql_real_escape_string(strtolower($_POST['plugin']));
+	$user = $_POST['newmanager'];
+	$plugin = strtolower($_POST['plugin']);
 	
 	// Require login
 	$post_login = 'editplugin.php?plugin='.$plugin;
@@ -32,13 +32,9 @@
 		$redirect_url = substr($url, 0, -1);
 		require('redirect.php');
 	} else {
-		// Set variables
-		$plugin = $plugin;
-		$user = $user;
 		if (!userismanager($user, $plugin))
 		{
-			$query = 'INSERT INTO managers (username, pluginname) VALUES ("'.$user.'", "'.$plugin.'")';
-			mysqli_query($db,$query);
+			db_run('INSERT INTO managers (username, pluginname) VALUES (?, ?)', 'ss', $user, $plugin);
 		} else {
 			// Return to page with errors
 			$url = 'editplugin.php?plugin='.$plugin.'&dupmanager=TRUE';

@@ -6,15 +6,24 @@
 	require('utilities.php');
 	
 	// Gather data
-	$search = mysqli_real_escape_string($db,$_GET['search']);
+	$search = $_GET['search'];
 	$sort = 'longname ASC';
 	if ($_GET['sort'] == 'name') { $sort = 'longname ASC'; }
 	if ($_GET['sort'] == 'rating') { $sort = 'rating DESC'; }
 	if ($_GET['sort'] == 'users') { $sort = 'users DESC'; }
-	$terms = explode(' ', $search);
-	$condition = '';
-	foreach ($terms as $term)
-		{ $condition = $condition.' AND (longname LIKE "%'.$term.'%" OR description LIKE "%'.$term.'%")'; }
+
+	// Build parameterized search condition
+	$condition_sql = '';
+	$condition_params = [];
+	$condition_types = '';
+	foreach (array_filter(explode(' ', trim($search))) as $term)
+		{
+			$condition_sql .= ' AND (longname LIKE ? OR description LIKE ?)';
+			$like = '%' . $term . '%';
+			$condition_params[] = $like;
+			$condition_params[] = $like;
+			$condition_types .= 'ss';
+		}
 	require('pluginlist.php');
 	
 	// Create XML

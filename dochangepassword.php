@@ -35,8 +35,7 @@
 		$redirect_url = substr($url, 0, -1);
 		include('redirect.php');
 	} else {
-		$query = 'UPDATE users SET password="'.md5($newpass).'" WHERE username="'.$user_sname.'"';
-		mysqli_query($db,$query);
+		db_run('UPDATE users SET password=? WHERE username=?', 'ss', md5($newpass), $user_sname);
 	?>
 	
 		<? $page_title = 'Password Updated - VOUPR'; ?>
