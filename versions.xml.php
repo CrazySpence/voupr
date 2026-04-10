@@ -7,23 +7,23 @@
 	require('utilities.php');
 
 	// Set variables
-	$name = mysqli_real_escape_string($db,$_GET['plugin']);
-	$query = 'SELECT * FROM plugins WHERE name="'.$name.'"';
-	$result = mysqli_query($db,$query);
+	$name = $_GET['plugin'];
+	$result = db_run('SELECT * FROM plugins WHERE name=?', 's', $name);
 	$row = mysqli_fetch_array($result);
 	$dispname = $row['longname'];
 	$desc = $row['description'];
 	
 	// Get version table info
-	$query = 'SELECT id,
-				versionstring,
-				DATE_FORMAT(DATE(timestamp), "%Y") AS year,
-	 			DATE_FORMAT(DATE(timestamp), "%m") AS month,
-	  		DATE_FORMAT(DATE(timestamp), "%d") AS day,
-	  		DATE_FORMAT(DATE(timestamp), "%j") AS dayofyear,
-	  		description
-	  	FROM versions WHERE plugin="'.$name.'" ORDER BY id DESC';
-	$result = mysqli_query($db,$query);
+	$result = db_run(
+		'SELECT id, versionstring,
+		        DATE_FORMAT(DATE(timestamp), "%Y") AS year,
+		        DATE_FORMAT(DATE(timestamp), "%m") AS month,
+		        DATE_FORMAT(DATE(timestamp), "%d") AS day,
+		        DATE_FORMAT(DATE(timestamp), "%j") AS dayofyear,
+		        description
+		 FROM versions WHERE plugin=? ORDER BY id DESC',
+		's', $name
+	);
 	$oldnew = 'newversion';
 
 	// Create XML

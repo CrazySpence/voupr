@@ -10,6 +10,9 @@
 	if ($_GET['sort'] == 'name') { $sort = 'longname ASC'; }
 	if ($_GET['sort'] == 'rating') { $sort = 'rating DESC'; }
 	if ($_GET['sort'] == 'users') { $sort = 'users DESC'; }
+	$condition_sql = '';
+	$condition_params = [];
+	$condition_types = '';
 ?>
 
 <? include('header.php'); ?>

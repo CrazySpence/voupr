@@ -8,10 +8,9 @@
 	
 		function user_login ($username)
 		{
-			global $db;
 			$_SESSION['user_name'] = $username;
 			$GLOBALS['user_name'] = $username;
-			$GLOBALS['user_sname'] = mysqli_real_escape_string($db,$username);
+			$GLOBALS['user_sname'] = $username;
 			$GLOBALS['user_loggedin'] = TRUE;
 		}
 	
@@ -58,11 +57,8 @@
 	
 		function password_match ($username, $password)
 		{
-			global $db;
-			$query = 'SELECT * FROM users WHERE username="'.$username.'" AND password="'.$password.'"';
-			$result = mysqli_query($db,$query);
-			if (mysqli_fetch_array($result)) { return TRUE; }
-			else { return FALSE; }
+			$result = db_run('SELECT * FROM users WHERE username=? AND password=?', 'ss', $username, $password);
+			return (bool) mysqli_fetch_array($result);
 		}
 	
 		// Check login

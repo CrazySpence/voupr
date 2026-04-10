@@ -3,9 +3,8 @@
 <? $page_title = "TRUE"; ?>
 <? require('database.php'); ?>
 <?
-	$user = mysqli_real_escape_string($db,strtolower($_GET['user']));
-	$query = 'UPDATE users SET confirmed=TRUE WHERE username="'.$user.'"';
-	mysqli_query($db,$query);
+	$user = strtolower($_GET['user']);
+	db_run('UPDATE users SET confirmed=TRUE WHERE username=?', 's', $user);
 ?>
 
 <? $page_title = $longname.'Confirmation Successfull - VOUPR'; ?>

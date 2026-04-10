@@ -5,18 +5,13 @@
 <? require('utilities.php'); ?>
 
 <?
-	$id = mysqli_real_escape_string($db,$_GET['id']);
-	$query = 'SELECT
-				plugins.name,
-				plugins.longname,
-				versions.id,
-				versions.versionstring,
-				versions.description,
-				DATE_FORMAT(DATE(timestamp), "%M %D, %Y") AS date
-			FROM versions, plugins
-			WHERE id="'.$id.'"
-			AND plugins.name=versions.plugin';
-	$result = mysqli_query($db,$query);
+	$id = intval($_GET['id']);
+	$result = db_run(
+		'SELECT plugins.name, plugins.longname, versions.id, versions.versionstring, versions.description,
+		        DATE_FORMAT(DATE(timestamp), "%M %D, %Y") AS date
+		 FROM versions, plugins WHERE id=? AND plugins.name=versions.plugin',
+		'i', $id
+	);
 	if (!$row = mysqli_fetch_array($result)) {
 		require('404redirect.php');
 		exit();
@@ -31,8 +26,7 @@
 	$descform = desafe($row['description']);
 	$descstatic = html($row['description']);
 	$date = $row['date'];
-	$query = 'SELECT versionstring, id FROM versions WHERE id=(SELECT MAX(id) FROM versions WHERE plugin="'.$plugin.'")';
-	$result = mysqli_query($db,$query);
+	$result = db_run('SELECT versionstring, id FROM versions WHERE id=(SELECT MAX(id) FROM versions WHERE plugin=?)', 's', $plugin);
 	$row = mysqli_fetch_array($result);
 	$latest = $row['versionstring'];
 	$latestid = $row['id'];

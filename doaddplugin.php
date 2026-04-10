@@ -5,8 +5,8 @@
 	require('utilities.php');
 
 	// Get form variables
-	$plugin = mysqli_real_escape_string($db,$_GET['plugin']);
-	$version = mysqli_real_escape_string($db,$_GET['version']);
+	$plugin = $_GET['plugin'];
+	$version = intval($_GET['version']);
 	
 	// Check user login
 	$post_login = 'doaddplugin.php?plugin='.$plugin.'&version='.$version.'';
@@ -19,8 +19,7 @@
 	if (strlen($version) == 0) { $badversion = TRUE; }
 	else
 	{
-		$query = 'SELECT id FROM versions WHERE plugin="'.$plugin.'" AND id="'.$version.'" LIMIT 1';
-		$result = mysqli_query($db,$query);
+		$result = db_run('SELECT id FROM versions WHERE plugin=? AND id=? LIMIT 1', 'si', $plugin, $version);
 		if (!mysqli_fetch_array($result)) { $badversion = TRUE; }
 	}
 	
@@ -32,21 +31,15 @@
 		// Return to page with errors
 		include('404redirect.php');
 	} else {
-		// Set variables
-		$plugin = $plugin;
-		$version = $version;
-		// Update version
-		$query = 'SELECT version FROM installed WHERE user="'.$user_sname.'" AND plugin="'.$plugin.'"';
-		$result = mysqli_query($db,$query);
+		$result = db_run('SELECT version FROM installed WHERE user=? AND plugin=?', 'ss', $user_sname, $plugin);
 		if ($row = mysqli_fetch_array($result))
 		{
-			$query = 'UPDATE installed SET version="'.$version.'" WHERE user="'.$user_sname.'" AND plugin="'.$plugin.'"';
+			db_run('UPDATE installed SET version=? WHERE user=? AND plugin=?', 'iss', $version, $user_sname, $plugin);
 		}
 		else
 		{
-			$query = 'INSERT INTO installed (user, plugin, version) VALUES ("'.$user_sname.'", "'.$plugin.'", "'.$version.'")';
+			db_run('INSERT INTO installed (user, plugin, version) VALUES (?, ?, ?)', 'ssi', $user_sname, $plugin, $version);
 		}
-		mysqli_query($db,$query);
 		
 		$redirect_url = 'plugin.php?name='.$plugin;
 		include('redirect.php');

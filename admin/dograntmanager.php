@@ -8,8 +8,8 @@
 
 <?
 	// Get form variables
-	$plugin = safe(strtolower($_POST['plugin']));
-	$user = safe($_POST['user']);
+	$plugin = strtolower($_POST['plugin']);
+	$user = $_POST['user'];
 	
 	// Check plugin name
 	if (!pluginexists($plugin)) { $badplugin = TRUE; }
@@ -29,8 +29,7 @@
 	} else {
 		if (!userismanager($user, $plugin))
 		{
-			$query = 'INSERT INTO managers (username, pluginname) VALUES ("'.$user.'", "'.$plugin.'")';
-			mysqli_query($db,$query);
+			db_run('INSERT INTO managers (username, pluginname) VALUES (?, ?)', 'ss', $user, $plugin);
 		}
 		
 		// Return to page

@@ -6,7 +6,7 @@
 <?php require('utilities.php'); ?>
 
 <?php
-	$news = $_GET['news'];
+	$news = intval($_GET['news']);
 	if (!$news) { $news = 15; }
 ?>
 
@@ -24,13 +24,11 @@ For installation instructions, see the <a href="http://www.vendetta-online.com/x
 <h3>Recent Updates</h3>
 <table class="newstable">
 <?php
-	$query = 'SELECT id, DATE_FORMAT(timestamp, "%b %e") as date, plugin, longname
-		FROM versions, plugins
-		WHERE plugin=name
-		ORDER BY id DESC
-		LIMIT '.$news;
-	// AND timestamp > SUBDATE(CURDATE(), INTERVAL 14 DAY)
-	$result = mysqli_query($db,$query);
+	$result = db_run(
+		'SELECT id, DATE_FORMAT(timestamp, "%b %e") as date, plugin, longname
+		 FROM versions, plugins WHERE plugin=name ORDER BY id DESC LIMIT ' . $news
+		// AND timestamp > SUBDATE(CURDATE(), INTERVAL 14 DAY)
+	);
 	while ($row = mysqli_fetch_array($result))
 	{
 	?>

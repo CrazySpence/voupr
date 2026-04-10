@@ -6,8 +6,8 @@
 
 <?
 	// Get form variables
-	$plugin = mysqli_real_escape_string($db,$_GET['plugin']);
-	$rating = mysqli_real_escape_string($db,$_GET['rating']);
+	$plugin = $_GET['plugin'];
+	$rating = intval($_GET['rating']);
 	
 	// Check user login
 	$post_login = 'dorating.php?plugin='.$plugin.'&rating='.$rating.'';
@@ -17,8 +17,7 @@
 	if (strlen($plugin) == 0) { $badpluginname = TRUE; }
 	else
 	{
-		$query = 'SELECT name FROM plugins WHERE name="'.$plugin.'" LIMIT 1';
-		$result = mysqli_query($db,$query);
+		$result = db_run('SELECT name FROM plugins WHERE name=? LIMIT 1', 's', $plugin);
 		if (!($row = mysqli_fetch_array($result))) { $badpluginname = TRUE; }
 	}
 	
@@ -32,21 +31,15 @@
 		// Return to page with errors
 		include('404redirect.php');
 	} else {
-		// Set variables
-		$plugin = $plugin;
-		$rating = $rating;
-		// Update version
-		$query = 'SELECT rating FROM ratings WHERE user="'.$user_sname.'" AND plugin="'.$plugin.'"';
-		$result = mysqli_query($db,$query);
+		$result = db_run('SELECT rating FROM ratings WHERE user=? AND plugin=?', 'ss', $user_sname, $plugin);
 		if ($row = mysqli_fetch_array($result))
 		{
-			$query = 'UPDATE ratings SET rating="'.$rating.'" WHERE user="'.$user_sname.'" AND plugin="'.$plugin.'"';
+			db_run('UPDATE ratings SET rating=? WHERE user=? AND plugin=?', 'iss', $rating, $user_sname, $plugin);
 		}
 		else
 		{
-			$query = 'INSERT INTO ratings (user, plugin, rating) VALUES ("'.$user_sname.'", "'.$plugin.'", "'.$rating.'")';
+			db_run('INSERT INTO ratings (user, plugin, rating) VALUES (?, ?, ?)', 'ssi', $user_sname, $plugin, $rating);
 		}
-		mysqli_query($db,$query);
 		
 		$redirect_url = 'plugin.php?name='.$plugin;
 		include('redirect.php');

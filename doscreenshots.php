@@ -6,7 +6,7 @@
 
 <?
 	// Get form variables
-	$plugin = mysqli_real_escape_string($db,$_POST['plugin']);
+	$plugin = $_POST['plugin'];
 	$file1 = $_FILES['screenshot1'];
 	$file2 = $_FILES['screenshot2'];
 	$file3 = $_FILES['screenshot3'];

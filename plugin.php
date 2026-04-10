@@ -7,13 +7,11 @@
 
 <?
 	// Get request data
-	$name = mysqli_real_escape_string($db,$_GET['name']);	
+	$name = $_GET['name'];
 	// Check plugin
 	if (!pluginexists($name)) { require('404redirect.php'); }
 	
-	// Set variables
-	$query = 'SELECT * FROM plugins WHERE name="'.$name.'"';
-	$result = mysqli_query($db,$query);
+	$result = db_run('SELECT * FROM plugins WHERE name=?', 's', $name);
 	$row = mysqli_fetch_array($result);
 	$dispname = html($row['longname']);
 	$desc = html($row['description']);
@@ -64,13 +62,11 @@
 
 	<?
 		// Get latest version
-		$query = 'SELECT
-					versionstring,
-					id,
-					DATE_FORMAT(DATE(timestamp), "%M %D, %Y") AS date
-				FROM versions
-				WHERE id=(SELECT MAX(id) FROM versions WHERE plugin="'.$name.'")';
-		$result = mysqli_query($db,$query);
+		$result = db_run(
+			'SELECT versionstring, id, DATE_FORMAT(DATE(timestamp), "%M %D, %Y") AS date
+			 FROM versions WHERE id=(SELECT MAX(id) FROM versions WHERE plugin=?)',
+			's', $name
+		);
 		$row = mysqli_fetch_array($result);
 		$latest = $row['versionstring'];
 		$latestid = $row['id'];
@@ -79,12 +75,10 @@
 		if ($user_loggedin)
 		{
 			// Get installed version
-			$query = 'SELECT version FROM installed WHERE plugin="'.$name.'" AND user="'.$user_sname.'" LIMIT 1';
-			$result = mysqli_query($db,$query);
+			$result = db_run('SELECT version FROM installed WHERE plugin=? AND user=? LIMIT 1', 'ss', $name, $user_sname);
 			if ($row = mysqli_fetch_array($result)) { $installed = $row['version']; }
 			// Get user rating
-			$query = 'SELECT rating FROM ratings WHERE plugin="'.$name.'" AND user="'.$user_sname.'" LIMIT 1';
-			$result = mysqli_query($db,$query);
+			$result = db_run('SELECT rating FROM ratings WHERE plugin=? AND user=? LIMIT 1', 'ss', $name, $user_sname);
 			if ($row = mysqli_fetch_array($result)) { $myrating = $row['rating']; }
 			else { $myrating = 0; }
 		}
@@ -151,13 +145,11 @@
 		<!--Begin Links-->
 		<?
 			// Check for links
-			$query = 'SELECT COUNT(type) AS numlinks FROM links WHERE plugin="'.$name.'"';
-			$result = mysqli_query($db,$query);
+			$result = db_run('SELECT COUNT(type) AS numlinks FROM links WHERE plugin=?', 's', $name);
 			$row = mysqli_fetch_array($result);
 			if ($row['numlinks'] != 0) { $links = TRUE; }
 			// Get links
-			$query = 'SELECT * FROM links WHERE plugin="'.$name.'"';
-			$result = mysqli_query($db,$query);
+			$result = db_run('SELECT * FROM links WHERE plugin=?', 's', $name);
 		?>
 		<? if ($links) { ?>
 			<div class="infobox">
@@ -243,8 +235,7 @@
 			</tr>
 			<?
 				// Get version table info
-				$query = 'SELECT id, versionstring, DATE_FORMAT(DATE(timestamp), "%Y - %b %d") AS date, description FROM versions WHERE plugin="'.$name.'" ORDER BY id DESC';
-				$result = mysqli_query($db,$query);
+				$result = db_run('SELECT id, versionstring, DATE_FORMAT(DATE(timestamp), "%Y - %b %d") AS date, description FROM versions WHERE plugin=? ORDER BY id DESC', 's', $name);
 				$oldnew = 'newversion';
 			?>
 			<? while($row = mysqli_fetch_array($result)) { ?>
