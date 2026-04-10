@@ -70,7 +70,7 @@
 		$password = $pass1;
 		db_run(
 			'INSERT INTO users (username, password, email, longname, created, confirmed) VALUES (?, ?, ?, ?, CURDATE(), FALSE)',
-			'ssss', $username, md5($password), $email, $username
+			'ssss', $username, password_hash($password, PASSWORD_DEFAULT), $email, $username
 		);
 	?>
 	

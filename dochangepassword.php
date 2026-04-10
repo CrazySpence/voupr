@@ -15,7 +15,7 @@
 	$newpass2 = $_POST['confirmpassword'];
 	
 	// Check old password
-	if (!password_match($username, md5($oldpass))) { $badoldpass = TRUE; }
+	if (!password_match($username, $oldpass)) { $badoldpass = TRUE; }
 	
 	// Check password match
 	if ($newpass != $newpass2) { $passmismatch = TRUE; }
@@ -35,7 +35,7 @@
 		$redirect_url = substr($url, 0, -1);
 		include('redirect.php');
 	} else {
-		db_run('UPDATE users SET password=? WHERE username=?', 'ss', md5($newpass), $user_sname);
+		db_run('UPDATE users SET password=? WHERE username=?', 'ss', password_hash($newpass, PASSWORD_DEFAULT), $user_sname);
 	?>
 	
 		<? $page_title = 'Password Updated - VOUPR'; ?>

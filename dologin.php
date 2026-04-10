@@ -11,7 +11,7 @@
 	$remember = $_POST['remember'];
 	
 	// Check credentials
-	$badlogin = check_login($username, md5($password), $remember);
+	$badlogin = check_login($username, $password, $remember);
 	
 	if ($badlogin) {
 		// Redirect on failure
