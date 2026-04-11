@@ -1,5 +1,5 @@
 # VOUPR Plugin Updater (Windows / PowerShell)
-# Keep this file private — it contains your API token.
+# Keep this file private -it contains your API token.
 #
 # REQUIREMENTS: PowerShell 5.0 or later (Windows 10/11 ship with 5.1).
 #
@@ -17,7 +17,7 @@
 $VouprToken   = '{{TOKEN}}'
 $VouprBaseUrl = '{{BASE_URL}}'
 
-# Plugin directory — edit if Vendetta Online is installed elsewhere,
+# Plugin directory -edit if Vendetta Online is installed elsewhere,
 # or set $env:PLUGIN_DIR before running.
 $PluginDir = if ($env:PLUGIN_DIR) {
     $env:PLUGIN_DIR
@@ -142,9 +142,9 @@ foreach ($p in $plugins) {
 
         'install' {
             if ($isNew) {
-                Write-Host "[AUTO] $dispName ($latestV) — installing..."
+                Write-Host "[AUTO] $dispName ($latestV) - installing..."
             } else {
-                Write-Host "[AUTO] $dispName — updating $instV → $latestV..."
+                Write-Host "[AUTO] $dispName - updating $instV -> $latestV..."
             }
             if (Install-Plugin -Url $dlUrl -ZipPath $zipTmp) {
                 Mark-Installed -Plugin $pluginId -VersionId $latestId
@@ -154,9 +154,9 @@ foreach ($p in $plugins) {
 
         'download' {
             if ($isNew) {
-                Write-Host "[AUTO] $dispName ($latestV) — downloading zip..."
+                Write-Host "[AUTO] $dispName ($latestV) - downloading zip..."
             } else {
-                Write-Host "[AUTO] $dispName — downloading zip $instV → $latestV..."
+                Write-Host "[AUTO] $dispName - downloading zip $instV -> $latestV..."
             }
             Write-Host "      Dest: $zipDest"
             try {
@@ -170,7 +170,7 @@ foreach ($p in $plugins) {
         }
 
         default {
-            # 'ask' or any unknown value — prompt the user
+            # 'ask' or any unknown value -prompt the user
             if ($isNew) {
                 Write-Host "[NEW] $dispName ($latestV)"
                 $answer = Read-Host "      Not installed locally. Download and install? [y/N]"
