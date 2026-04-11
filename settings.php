@@ -12,7 +12,31 @@
 	<h3>Settings</h3>
 
 	<div class="col floatleft">
-		
+		<div class="infobox">
+			<b>API Token:</b>
+			<div style="height: 5px;"></div>
+			<?
+				$result = db_run('SELECT api_token FROM users WHERE username=?', 's', $user_sname);
+				$row = mysqli_fetch_array($result);
+				$has_token = !empty($row['api_token']);
+			?>
+			<? if ($has_token) { ?>
+				<p>An API token is active on your account.</p>
+				<form method="post" action="dogentoken.php">
+					<input type="hidden" name="csrf_token" value="<?=$_SESSION['csrf_token']?>">
+					<input type="submit" value="Regenerate Token">
+				</form>
+			<? } else { ?>
+				<p>No API token set. Generate one to use the plugin updater script.</p>
+				<form method="post" action="dogentoken.php">
+					<input type="hidden" name="csrf_token" value="<?=$_SESSION['csrf_token']?>">
+					<input type="submit" value="Generate API Token">
+				</form>
+			<? } ?>
+			<br>
+			<a href="getscript.php">Download macOS updater script</a>
+			(requires an active token)
+		</div>
 	</div>
 
 	<div class="col floatright">

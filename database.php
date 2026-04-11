@@ -1,6 +1,6 @@
 <?
     include('component.php');
-    include('../secrets.inc');
+    include(__DIR__ . '/../secrets.inc');
     if (!$mysql) { $mysql = TRUE;
 	    /////////////////////////////////////
 	

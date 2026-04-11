@@ -1,0 +1,140 @@
+#!/usr/bin/env bash
+# VOUPR Plugin Updater
+# Keep this file private — it contains your API token.
+# Run with: bash voupr-update.sh
+
+VOUPR_TOKEN="{{TOKEN}}"
+VOUPR_BASE_URL="{{BASE_URL}}"
+
+# Plugin directory — edit if Vendetta Online is not in /Applications
+PLUGIN_DIR="${PLUGIN_DIR:-/Applications/Vendetta Online.app/Contents/Resources/plugins}"
+
+# ---------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------
+
+die() { echo "ERROR: $*" >&2; exit 1; }
+
+check_deps() {
+    command -v curl >/dev/null 2>&1 || die "curl is required but not installed."
+    command -v jq    >/dev/null 2>&1 && return
+    command -v python3 >/dev/null 2>&1 && return
+    die "jq or python3 is required for JSON parsing. Install with: brew install jq"
+}
+
+fetch_plugins() {
+    curl -fsSL "${VOUPR_BASE_URL}/api/myplugins.json.php?token=${VOUPR_TOKEN}" \
+        || die "Failed to reach VOUPR. Check your internet connection."
+}
+
+mark_installed() {
+    # Notify VOUPR that this version is now installed — failure is non-fatal
+    curl -fsSL -X POST \
+        --data-urlencode "token=${VOUPR_TOKEN}" \
+        --data-urlencode "plugin=$1" \
+        --data-urlencode "version=$2" \
+        "${VOUPR_BASE_URL}/domarkinstalled.php" >/dev/null 2>&1 || true
+}
+
+# ---------------------------------------------------------------
+# JSON field extraction — prefers jq, falls back to python3
+# ---------------------------------------------------------------
+
+jq_expr() {
+    local json="$1" expr="$2"
+    if command -v jq >/dev/null 2>&1; then
+        echo "$json" | jq -r "$expr"
+    else
+        echo "$json" | python3 -c "import sys,json; d=json.load(sys.stdin); print($expr)"
+    fi
+}
+
+plugin_field() {
+    local json="$1" idx="$2" field="$3"
+    if command -v jq >/dev/null 2>&1; then
+        echo "$json" | jq -r ".plugins[$idx].$field"
+    else
+        echo "$json" | python3 -c \
+            "import sys,json; p=json.load(sys.stdin)['plugins'][$idx]; v=p['$field']; print(str(v).lower() if isinstance(v,bool) else v)"
+    fi
+}
+
+# ---------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------
+
+check_deps
+
+if [ ! -d "$PLUGIN_DIR" ]; then
+    echo "WARNING: Plugin directory not found: $PLUGIN_DIR"
+    echo "         Set the PLUGIN_DIR environment variable to override."
+    echo ""
+fi
+
+echo "Fetching plugin list from VOUPR..."
+JSON=$(fetch_plugins)
+
+# Check for API-level error
+if echo "$JSON" | grep -q '"error"'; then
+    ERR=$(jq_expr "$JSON" 'd["error"]' 2>/dev/null || echo "(see above)")
+    die "API error: $ERR"
+fi
+
+if command -v jq >/dev/null 2>&1; then
+    COUNT=$(echo "$JSON" | jq '.plugins | length')
+else
+    COUNT=$(echo "$JSON" | python3 -c "import sys,json; print(len(json.load(sys.stdin)['plugins']))")
+fi
+
+if [ "$COUNT" -eq 0 ]; then
+    echo "No plugins tracked on VOUPR. Visit ${VOUPR_BASE_URL} to add plugins."
+    exit 0
+fi
+
+echo "Checking $COUNT plugin(s) for updates..."
+echo ""
+
+UPDATED=0
+
+for i in $(seq 0 $((COUNT - 1))); do
+    PLUGIN=$(plugin_field "$JSON" "$i" "plugin")
+    DISP=$(plugin_field "$JSON" "$i" "dispname")
+    INST_V=$(plugin_field "$JSON" "$i" "installed_version")
+    LATE_V=$(plugin_field "$JSON" "$i" "latest_version")
+    LATE_ID=$(plugin_field "$JSON" "$i" "latest_id")
+    UPDATE=$(plugin_field "$JSON" "$i" "update_available")
+    DL_URL=$(plugin_field "$JSON" "$i" "download_url")
+
+    if [ "$UPDATE" != "true" ]; then
+        echo "[OK]  $DISP ($INST_V)"
+        continue
+    fi
+
+    echo "[!!]  $DISP"
+    echo "      Installed : $INST_V"
+    echo "      Latest    : $LATE_V"
+    printf "      Download update? [y/N] "
+    read -r ANSWER
+
+    if [ "$ANSWER" = "y" ] || [ "$ANSWER" = "Y" ]; then
+        DEST="${PLUGIN_DIR}/${PLUGIN}-${LATE_V}.zip"
+        echo "      Downloading to: $DEST"
+        if curl -fsSL -o "$DEST" "$DL_URL"; then
+            echo "      Downloaded successfully."
+            echo "      Syncing version to VOUPR..."
+            mark_installed "$PLUGIN" "$LATE_ID"
+            UPDATED=$((UPDATED + 1))
+        else
+            echo "      ERROR: Download failed." >&2
+        fi
+    else
+        echo "      Skipped."
+    fi
+    echo ""
+done
+
+if [ "$UPDATED" -gt 0 ]; then
+    echo "$UPDATED plugin(s) updated."
+else
+    echo "No updates applied."
+fi
