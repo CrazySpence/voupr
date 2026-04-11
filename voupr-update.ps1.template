@@ -4,9 +4,10 @@
 # REQUIREMENTS: PowerShell 5.0 or later (Windows 10/11 ship with 5.1).
 #
 # EXECUTION POLICY:
-#   If you see "running scripts is disabled", run once in an elevated shell:
-#       Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
-#   Then re-run this script normally.
+#   If you see "running scripts is disabled", unblock just this file:
+#       Unblock-File -Path .\voupr-update.ps1
+#   Then re-run normally. This removes the internet-download flag from this
+#   file only and does not change any system-wide security settings.
 #
 # Run with:
 #   powershell -File voupr-update.ps1
