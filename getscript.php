@@ -17,9 +17,15 @@
 		exit();
 	}
 
-	$os = ($_GET['os'] === 'linux') ? 'linux' : 'mac';
-	$template_file = ($os === 'linux') ? 'voupr-update-linux.sh.template' : 'voupr-update.sh.template';
-	$download_name = ($os === 'linux') ? 'voupr-update-linux.sh' : 'voupr-update.sh';
+	$allowed_os = ['mac', 'linux', 'windows'];
+	$os = in_array($_GET['os'] ?? '', $allowed_os, true) ? $_GET['os'] : 'mac';
+	$templates = [
+		'mac'     => ['file' => 'voupr-update.sh.template',       'name' => 'voupr-update.sh'],
+		'linux'   => ['file' => 'voupr-update-linux.sh.template', 'name' => 'voupr-update-linux.sh'],
+		'windows' => ['file' => 'voupr-update.ps1.template',      'name' => 'voupr-update.ps1'],
+	];
+	$template_file = $templates[$os]['file'];
+	$download_name = $templates[$os]['name'];
 
 	$base_url = 'https://' . $_SERVER['SERVER_NAME'];
 	$template = file_get_contents(__DIR__ . '/' . $template_file);

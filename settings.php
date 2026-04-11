@@ -36,7 +36,8 @@
 			<br>
 			Download updater script (requires an active token):<br>
 			<a href="getscript.php">macOS</a> &nbsp;|&nbsp;
-			<a href="getscript.php?os=linux">Linux</a>
+			<a href="getscript.php?os=linux">Linux</a> &nbsp;|&nbsp;
+			<a href="getscript.php?os=windows">Windows</a>
 		</div>
 	</div>
 
