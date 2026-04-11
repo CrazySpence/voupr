@@ -34,8 +34,9 @@
 				</form>
 			<? } ?>
 			<br>
-			<a href="getscript.php">Download macOS updater script</a>
-			(requires an active token)
+			Download updater script (requires an active token):<br>
+			<a href="getscript.php">macOS</a> &nbsp;|&nbsp;
+			<a href="getscript.php?os=linux">Linux</a>
 		</div>
 	</div>
 

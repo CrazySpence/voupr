@@ -1,0 +1,204 @@
+#!/usr/bin/env bash
+# VOUPR Plugin Updater (Linux)
+# Keep this file private — it contains your API token.
+# Run with: bash voupr-update-linux.sh
+
+VOUPR_TOKEN="{{TOKEN}}"
+VOUPR_BASE_URL="{{BASE_URL}}"
+
+# Plugin directory — edit if Vendetta Online is installed elsewhere
+PLUGIN_DIR="${PLUGIN_DIR:-$HOME/.vendetta/plugins}"
+
+# ---------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------
+
+die() { echo "ERROR: $*" >&2; exit 1; }
+
+check_deps() {
+    command -v curl >/dev/null 2>&1 || die "curl is required but not installed.
+  Install it with your package manager:
+    Debian/Ubuntu : sudo apt install curl
+    Fedora/RHEL   : sudo dnf install curl
+    Arch          : sudo pacman -S curl"
+
+    if ! command -v unzip >/dev/null 2>&1; then
+        echo "ERROR: unzip is not installed." >&2
+        echo "  Install it with your package manager:" >&2
+        echo "    Debian/Ubuntu : sudo apt install unzip" >&2
+        echo "    Fedora/RHEL   : sudo dnf install unzip" >&2
+        echo "    Arch          : sudo pacman -S unzip" >&2
+        exit 1
+    fi
+
+    command -v jq     >/dev/null 2>&1 && return
+    command -v python3 >/dev/null 2>&1 && return
+    die "jq or python3 is required for JSON parsing.
+  Install jq with your package manager:
+    Debian/Ubuntu : sudo apt install jq
+    Fedora/RHEL   : sudo dnf install jq
+    Arch          : sudo pacman -S jq"
+}
+
+fetch_plugins() {
+    curl -fsSL "${VOUPR_BASE_URL}/api/myplugins.json.php?token=${VOUPR_TOKEN}" \
+        || die "Failed to reach VOUPR. Check your internet connection."
+}
+
+mark_installed() {
+    # Notify VOUPR that this version is now installed — failure is non-fatal
+    curl -fsSL -X POST \
+        --data-urlencode "token=${VOUPR_TOKEN}" \
+        --data-urlencode "plugin=$1" \
+        --data-urlencode "version=$2" \
+        "${VOUPR_BASE_URL}/domarkinstalled.php" >/dev/null 2>&1 || true
+}
+
+# Returns 0 (true) if a subdirectory matching the plugin identifier exists
+# in PLUGIN_DIR, using case-insensitive comparison.
+is_locally_installed() {
+    local plugin_id="$1"
+    local lower_id
+    lower_id=$(echo "$plugin_id" | tr '[:upper:]' '[:lower:]')
+    [ -d "$PLUGIN_DIR" ] || return 1
+    while IFS= read -r -d '' dir; do
+        local lower_dir
+        lower_dir=$(basename "$dir" | tr '[:upper:]' '[:lower:]')
+        if [ "$lower_dir" = "$lower_id" ]; then
+            return 0
+        fi
+    done < <(find "$PLUGIN_DIR" -maxdepth 1 -mindepth 1 -type d -print0)
+    return 1
+}
+
+# Download and extract a plugin zip, then clean up the zip.
+# Usage: download_and_install <url> <zip_dest>
+download_and_install() {
+    local url="$1" dest="$2"
+    echo "      URL : $url"
+    echo "      Zip : $dest"
+    if ! curl -fsSL -o "$dest" "$url"; then
+        echo "      ERROR: Download failed." >&2
+        return 1
+    fi
+    echo "      Extracting..."
+    if ! unzip -o "$dest" -d "$PLUGIN_DIR" >/dev/null; then
+        echo "      ERROR: Extraction failed." >&2
+        rm -f "$dest"
+        return 1
+    fi
+    rm -f "$dest"
+    echo "      Done."
+    return 0
+}
+
+# ---------------------------------------------------------------
+# JSON field extraction — prefers jq, falls back to python3
+# ---------------------------------------------------------------
+
+plugin_field() {
+    local json="$1" idx="$2" field="$3"
+    if command -v jq >/dev/null 2>&1; then
+        echo "$json" | jq -r ".plugins[$idx].$field"
+    else
+        echo "$json" | python3 -c \
+            "import sys,json; p=json.load(sys.stdin)['plugins'][$idx]; v=p['$field']; print(str(v).lower() if isinstance(v,bool) else v)"
+    fi
+}
+
+# ---------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------
+
+check_deps
+
+if [ ! -d "$PLUGIN_DIR" ]; then
+    echo "WARNING: Plugin directory not found: $PLUGIN_DIR"
+    echo "         Set the PLUGIN_DIR environment variable to override."
+    echo ""
+fi
+
+echo "Fetching plugin list from VOUPR..."
+JSON=$(fetch_plugins)
+
+# Check for API-level error
+if echo "$JSON" | grep -q '"error"'; then
+    if command -v jq >/dev/null 2>&1; then
+        ERR=$(echo "$JSON" | jq -r '.error')
+    else
+        ERR=$(echo "$JSON" | python3 -c "import sys,json; print(json.load(sys.stdin)['error'])")
+    fi
+    die "API error: $ERR"
+fi
+
+if command -v jq >/dev/null 2>&1; then
+    COUNT=$(echo "$JSON" | jq '.plugins | length')
+else
+    COUNT=$(echo "$JSON" | python3 -c "import sys,json; print(len(json.load(sys.stdin)['plugins']))")
+fi
+
+if [ "$COUNT" -eq 0 ]; then
+    echo "No plugins tracked on VOUPR. Visit ${VOUPR_BASE_URL} to add plugins."
+    exit 0
+fi
+
+echo "Checking $COUNT plugin(s)..."
+echo ""
+
+UPDATED=0
+
+for i in $(seq 0 $((COUNT - 1))); do
+    PLUGIN=$(plugin_field "$JSON" "$i" "plugin")
+    DISP=$(plugin_field "$JSON" "$i" "dispname")
+    INST_V=$(plugin_field "$JSON" "$i" "installed_version")
+    LATE_V=$(plugin_field "$JSON" "$i" "latest_version")
+    LATE_ID=$(plugin_field "$JSON" "$i" "latest_id")
+    UPDATE=$(plugin_field "$JSON" "$i" "update_available")
+
+    # Construct download URL from local VOUPR_BASE_URL so the correct
+    # host/protocol is always used regardless of server-side config.
+    DL_URL="${VOUPR_BASE_URL}/downloads/${PLUGIN}-${LATE_V}.zip"
+    ZIP_TMP="${TMPDIR:-/tmp}/${PLUGIN}-${LATE_V}.zip"
+
+    if ! is_locally_installed "$PLUGIN"; then
+        # Plugin folder not found locally — offer fresh install
+        echo "[NEW] $DISP ($LATE_V)"
+        printf "      Not installed locally. Download and install? [y/N] "
+        read -r ANSWER
+        if [ "$ANSWER" = "y" ] || [ "$ANSWER" = "Y" ]; then
+            if download_and_install "$DL_URL" "$ZIP_TMP"; then
+                mark_installed "$PLUGIN" "$LATE_ID"
+                UPDATED=$((UPDATED + 1))
+            fi
+        else
+            echo "      Skipped."
+        fi
+
+    elif [ "$UPDATE" = "true" ]; then
+        # Plugin is installed locally but an update is available
+        echo "[!!] $DISP"
+        echo "      Installed : $INST_V"
+        echo "      Latest    : $LATE_V"
+        printf "      Download and install update? [y/N] "
+        read -r ANSWER
+        if [ "$ANSWER" = "y" ] || [ "$ANSWER" = "Y" ]; then
+            if download_and_install "$DL_URL" "$ZIP_TMP"; then
+                mark_installed "$PLUGIN" "$LATE_ID"
+                UPDATED=$((UPDATED + 1))
+            fi
+        else
+            echo "      Skipped."
+        fi
+
+    else
+        echo "[OK]  $DISP ($INST_V)"
+    fi
+
+    echo ""
+done
+
+if [ "$UPDATED" -gt 0 ]; then
+    echo "$UPDATED plugin(s) installed/updated."
+else
+    echo "No changes made."
+fi
