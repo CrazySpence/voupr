@@ -16,7 +16,8 @@ PLUGIN_DIR="${PLUGIN_DIR:-/Applications/Vendetta Online.app/Contents/Resources/p
 die() { echo "ERROR: $*" >&2; exit 1; }
 
 check_deps() {
-    command -v curl >/dev/null 2>&1 || die "curl is required but not installed."
+    command -v curl  >/dev/null 2>&1 || die "curl is required but not installed."
+    command -v unzip >/dev/null 2>&1 || die "unzip is required but not installed."
     command -v jq    >/dev/null 2>&1 && return
     command -v python3 >/dev/null 2>&1 && return
     die "jq or python3 is required for JSON parsing. Install with: brew install jq"
@@ -36,18 +37,47 @@ mark_installed() {
         "${VOUPR_BASE_URL}/domarkinstalled.php" >/dev/null 2>&1 || true
 }
 
+# Returns 0 (true) if a subdirectory matching the plugin identifier exists
+# in PLUGIN_DIR, using case-insensitive comparison.
+is_locally_installed() {
+    local plugin_id="$1"
+    local lower_id
+    lower_id=$(echo "$plugin_id" | tr '[:upper:]' '[:lower:]')
+    [ -d "$PLUGIN_DIR" ] || return 1
+    while IFS= read -r -d '' dir; do
+        local lower_dir
+        lower_dir=$(basename "$dir" | tr '[:upper:]' '[:lower:]')
+        if [ "$lower_dir" = "$lower_id" ]; then
+            return 0
+        fi
+    done < <(find "$PLUGIN_DIR" -maxdepth 1 -mindepth 1 -type d -print0)
+    return 1
+}
+
+# Download and extract a plugin zip, then clean up the zip.
+# Usage: download_and_install <url> <zip_dest>
+download_and_install() {
+    local url="$1" dest="$2"
+    echo "      URL : $url"
+    echo "      Zip : $dest"
+    if ! curl -fsSL -o "$dest" "$url"; then
+        echo "      ERROR: Download failed." >&2
+        return 1
+    fi
+    echo "      Extracting..."
+    if ! unzip -o "$dest" -d "$PLUGIN_DIR" >/dev/null; then
+        echo "      ERROR: Extraction failed." >&2
+        rm -f "$dest"
+        return 1
+    fi
+    rm -f "$dest"
+    echo "      Done."
+    return 0
+}
+
 # ---------------------------------------------------------------
 # JSON field extraction — prefers jq, falls back to python3
 # ---------------------------------------------------------------
-
-jq_expr() {
-    local json="$1" expr="$2"
-    if command -v jq >/dev/null 2>&1; then
-        echo "$json" | jq -r "$expr"
-    else
-        echo "$json" | python3 -c "import sys,json; d=json.load(sys.stdin); print($expr)"
-    fi
-}
 
 plugin_field() {
     local json="$1" idx="$2" field="$3"
@@ -76,7 +106,11 @@ JSON=$(fetch_plugins)
 
 # Check for API-level error
 if echo "$JSON" | grep -q '"error"'; then
-    ERR=$(jq_expr "$JSON" 'd["error"]' 2>/dev/null || echo "(see above)")
+    if command -v jq >/dev/null 2>&1; then
+        ERR=$(echo "$JSON" | jq -r '.error')
+    else
+        ERR=$(echo "$JSON" | python3 -c "import sys,json; print(json.load(sys.stdin)['error'])")
+    fi
     die "API error: $ERR"
 fi
 
@@ -91,7 +125,7 @@ if [ "$COUNT" -eq 0 ]; then
     exit 0
 fi
 
-echo "Checking $COUNT plugin(s) for updates..."
+echo "Checking $COUNT plugin(s)..."
 echo ""
 
 UPDATED=0
@@ -107,38 +141,47 @@ for i in $(seq 0 $((COUNT - 1))); do
     # Construct download URL from local VOUPR_BASE_URL so the correct
     # host/protocol is always used regardless of server-side config.
     DL_URL="${VOUPR_BASE_URL}/downloads/${PLUGIN}-${LATE_V}.zip"
+    ZIP_TMP="${TMPDIR:-/tmp}/${PLUGIN}-${LATE_V}.zip"
 
-    if [ "$UPDATE" != "true" ]; then
-        echo "[OK]  $DISP ($INST_V)"
-        continue
-    fi
-
-    echo "[!!]  $DISP"
-    echo "      Installed : $INST_V"
-    echo "      Latest    : $LATE_V"
-    printf "      Download update? [y/N] "
-    read -r ANSWER
-
-    if [ "$ANSWER" = "y" ] || [ "$ANSWER" = "Y" ]; then
-        DEST="${PLUGIN_DIR}/${PLUGIN}-${LATE_V}.zip"
-        echo "      URL: $DL_URL"
-        echo "      Dest: $DEST"
-        if curl -fsSL -o "$DEST" "$DL_URL"; then
-            echo "      Downloaded successfully."
-            echo "      Syncing version to VOUPR..."
-            mark_installed "$PLUGIN" "$LATE_ID"
-            UPDATED=$((UPDATED + 1))
+    if ! is_locally_installed "$PLUGIN"; then
+        # Plugin folder not found locally — offer fresh install
+        echo "[NEW] $DISP ($LATE_V)"
+        printf "      Not installed locally. Download and install? [y/N] "
+        read -r ANSWER
+        if [ "$ANSWER" = "y" ] || [ "$ANSWER" = "Y" ]; then
+            if download_and_install "$DL_URL" "$ZIP_TMP"; then
+                mark_installed "$PLUGIN" "$LATE_ID"
+                UPDATED=$((UPDATED + 1))
+            fi
         else
-            echo "      ERROR: Download failed (check URL above)." >&2
+            echo "      Skipped."
         fi
+
+    elif [ "$UPDATE" = "true" ]; then
+        # Plugin is installed locally but an update is available
+        echo "[!!] $DISP"
+        echo "      Installed : $INST_V"
+        echo "      Latest    : $LATE_V"
+        printf "      Download and install update? [y/N] "
+        read -r ANSWER
+        if [ "$ANSWER" = "y" ] || [ "$ANSWER" = "Y" ]; then
+            if download_and_install "$DL_URL" "$ZIP_TMP"; then
+                mark_installed "$PLUGIN" "$LATE_ID"
+                UPDATED=$((UPDATED + 1))
+            fi
+        else
+            echo "      Skipped."
+        fi
+
     else
-        echo "      Skipped."
+        echo "[OK]  $DISP ($INST_V)"
     fi
+
     echo ""
 done
 
 if [ "$UPDATED" -gt 0 ]; then
-    echo "$UPDATED plugin(s) updated."
+    echo "$UPDATED plugin(s) installed/updated."
 else
-    echo "No updates applied."
+    echo "No changes made."
 fi
