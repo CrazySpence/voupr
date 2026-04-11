@@ -116,36 +116,77 @@ foreach ($p in $plugins) {
     $latestV   = $p.latest_version
     $latestId  = [int]$p.latest_id
     $hasUpdate = [bool]$p.update_available
+    $action    = $p.update_action
 
-    # Construct download URL from local $VouprBaseUrl so the correct
-    # host/protocol is always used regardless of server-side config.
-    $dlUrl  = "$VouprBaseUrl/downloads/$pluginId-$latestV.zip"
-    $zipTmp = Join-Path $env:TEMP "$pluginId-$latestV.zip"
+    $dlUrl   = "$VouprBaseUrl/downloads/$pluginId-$latestV.zip"
+    $zipTmp  = Join-Path $env:TEMP "$pluginId-$latestV.zip"
+    $zipDest = Join-Path $PluginDir "$pluginId-$latestV.zip"
 
-    if (-not (Test-PluginInstalled -PluginId $pluginId)) {
-        Write-Host "[NEW] $dispName ($latestV)"
-        $answer = Read-Host "      Not installed locally. Download and install? [y/N]"
-        if ($answer -eq 'y' -or $answer -eq 'Y') {
-            if (Install-Plugin -Url $dlUrl -ZipPath $zipTmp) {
-                Mark-Installed -Plugin $pluginId -VersionId $latestId
-                $updated++
-            }
-        } else { Write-Host "      Skipped." }
+    # Skip takes priority
+    if ($action -eq 'skip') {
+        Write-Host "[SKIP] $dispName"
+        Write-Host ""
+        continue
+    }
 
-    } elseif ($hasUpdate) {
-        Write-Host "[!!] $dispName"
-        Write-Host "      Installed : $instV"
-        Write-Host "      Latest    : $latestV"
-        $answer = Read-Host "      Download and install update? [y/N]"
-        if ($answer -eq 'y' -or $answer -eq 'Y') {
-            if (Install-Plugin -Url $dlUrl -ZipPath $zipTmp) {
-                Mark-Installed -Plugin $pluginId -VersionId $latestId
-                $updated++
-            }
-        } else { Write-Host "      Skipped." }
+    $isNew = -not (Test-PluginInstalled -PluginId $pluginId)
 
-    } else {
+    # Nothing to do if up to date and present locally
+    if (-not $isNew -and -not $hasUpdate) {
         Write-Host "[OK]  $dispName ($instV)"
+        Write-Host ""
+        continue
+    }
+
+    switch ($action) {
+
+        'install' {
+            if ($isNew) {
+                Write-Host "[AUTO] $dispName ($latestV) — installing..."
+            } else {
+                Write-Host "[AUTO] $dispName — updating $instV → $latestV..."
+            }
+            if (Install-Plugin -Url $dlUrl -ZipPath $zipTmp) {
+                Mark-Installed -Plugin $pluginId -VersionId $latestId
+                $updated++
+            }
+        }
+
+        'download' {
+            if ($isNew) {
+                Write-Host "[AUTO] $dispName ($latestV) — downloading zip..."
+            } else {
+                Write-Host "[AUTO] $dispName — downloading zip $instV → $latestV..."
+            }
+            Write-Host "      Dest: $zipDest"
+            try {
+                Invoke-WebRequest -Uri $dlUrl -OutFile $zipDest -UseBasicParsing -ErrorAction Stop
+                Write-Host "      Downloaded."
+                Mark-Installed -Plugin $pluginId -VersionId $latestId
+                $updated++
+            } catch {
+                Write-Host "      ERROR: Download failed. $_" -ForegroundColor Red
+            }
+        }
+
+        default {
+            # 'ask' or any unknown value — prompt the user
+            if ($isNew) {
+                Write-Host "[NEW] $dispName ($latestV)"
+                $answer = Read-Host "      Not installed locally. Download and install? [y/N]"
+            } else {
+                Write-Host "[!!]  $dispName"
+                Write-Host "      Installed : $instV"
+                Write-Host "      Latest    : $latestV"
+                $answer = Read-Host "      Download and install update? [y/N]"
+            }
+            if ($answer -eq 'y' -or $answer -eq 'Y') {
+                if (Install-Plugin -Url $dlUrl -ZipPath $zipTmp) {
+                    Mark-Installed -Plugin $pluginId -VersionId $latestId
+                    $updated++
+                }
+            } else { Write-Host "      Skipped." }
+        }
     }
 
     Write-Host ""
