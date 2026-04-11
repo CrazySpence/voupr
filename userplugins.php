@@ -58,7 +58,7 @@
 		</tr>
 	<? } ?>
 </table>
-<div style="margin-top: 8px;"><input type="submit" value="Save Preferences"></div>
+<div style="margin-top: 8px;"><input type="submit" value="Save Preferences"> &nbsp;<a href="updaterhelp.php">What do these options mean?</a></div>
 </form>
 
 <? include('footer.php'); ?>

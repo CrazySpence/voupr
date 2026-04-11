@@ -38,6 +38,7 @@
 			<a href="getscript.php">macOS</a> &nbsp;|&nbsp;
 			<a href="getscript.php?os=linux">Linux</a> &nbsp;|&nbsp;
 			<a href="getscript.php?os=windows">Windows</a>
+			&nbsp;&nbsp;<a href="updaterhelp.php">[ How does this work? ]</a>
 		</div>
 	</div>
 
