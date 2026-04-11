@@ -103,7 +103,10 @@ for i in $(seq 0 $((COUNT - 1))); do
     LATE_V=$(plugin_field "$JSON" "$i" "latest_version")
     LATE_ID=$(plugin_field "$JSON" "$i" "latest_id")
     UPDATE=$(plugin_field "$JSON" "$i" "update_available")
-    DL_URL=$(plugin_field "$JSON" "$i" "download_url")
+
+    # Construct download URL from local VOUPR_BASE_URL so the correct
+    # host/protocol is always used regardless of server-side config.
+    DL_URL="${VOUPR_BASE_URL}/downloads/${PLUGIN}-${LATE_V}.zip"
 
     if [ "$UPDATE" != "true" ]; then
         echo "[OK]  $DISP ($INST_V)"
@@ -118,14 +121,15 @@ for i in $(seq 0 $((COUNT - 1))); do
 
     if [ "$ANSWER" = "y" ] || [ "$ANSWER" = "Y" ]; then
         DEST="${PLUGIN_DIR}/${PLUGIN}-${LATE_V}.zip"
-        echo "      Downloading to: $DEST"
+        echo "      URL: $DL_URL"
+        echo "      Dest: $DEST"
         if curl -fsSL -o "$DEST" "$DL_URL"; then
             echo "      Downloaded successfully."
             echo "      Syncing version to VOUPR..."
             mark_installed "$PLUGIN" "$LATE_ID"
             UPDATED=$((UPDATED + 1))
         else
-            echo "      ERROR: Download failed." >&2
+            echo "      ERROR: Download failed (check URL above)." >&2
         fi
     else
         echo "      Skipped."
