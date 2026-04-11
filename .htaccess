@@ -1,0 +1,3 @@
+<Files "*.template">
+    Require all denied
+</Files>
