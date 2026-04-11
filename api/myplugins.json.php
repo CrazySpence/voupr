@@ -28,6 +28,7 @@
 			plugins.longname AS dispname,
 			iv.versionstring AS installed_version,
 			installed.version AS installed_id,
+			installed.update_action AS update_action,
 			lv.id AS latest_id,
 			lv.versionstring AS latest_version
 		 FROM installed
@@ -49,6 +50,7 @@
 			'dispname'          => $row['dispname'],
 			'installed_version' => $row['installed_version'],
 			'installed_id'      => intval($row['installed_id']),
+			'update_action'     => $row['update_action'],
 			'latest_version'    => $latestv,
 			'latest_id'         => intval($row['latest_id']),
 			'update_available'  => intval($row['installed_id']) < intval($row['latest_id']),

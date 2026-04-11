@@ -46,7 +46,6 @@ fetch_plugins() {
 }
 
 mark_installed() {
-    # Notify VOUPR that this version is now installed — failure is non-fatal
     curl -fsSL -X POST \
         --data-urlencode "token=${VOUPR_TOKEN}" \
         --data-urlencode "plugin=$1" \
@@ -72,7 +71,6 @@ is_locally_installed() {
 }
 
 # Download and extract a plugin zip, then clean up the zip.
-# Usage: download_and_install <url> <zip_dest>
 download_and_install() {
     local url="$1" dest="$2"
     echo "      URL : $url"
@@ -121,7 +119,6 @@ fi
 echo "Fetching plugin list from VOUPR..."
 JSON=$(fetch_plugins)
 
-# Check for API-level error
 if echo "$JSON" | grep -q '"error"'; then
     if command -v jq >/dev/null 2>&1; then
         ERR=$(echo "$JSON" | jq -r '.error')
@@ -154,45 +151,82 @@ for i in $(seq 0 $((COUNT - 1))); do
     LATE_V=$(plugin_field "$JSON" "$i" "latest_version")
     LATE_ID=$(plugin_field "$JSON" "$i" "latest_id")
     UPDATE=$(plugin_field "$JSON" "$i" "update_available")
+    ACTION=$(plugin_field "$JSON" "$i" "update_action")
 
-    # Construct download URL from local VOUPR_BASE_URL so the correct
-    # host/protocol is always used regardless of server-side config.
     DL_URL="${VOUPR_BASE_URL}/downloads/${PLUGIN}-${LATE_V}.zip"
     ZIP_TMP="${TMPDIR:-/tmp}/${PLUGIN}-${LATE_V}.zip"
+    ZIP_DEST="${PLUGIN_DIR}/${PLUGIN}-${LATE_V}.zip"
 
-    if ! is_locally_installed "$PLUGIN"; then
-        # Plugin folder not found locally — offer fresh install
-        echo "[NEW] $DISP ($LATE_V)"
-        printf "      Not installed locally. Download and install? [y/N] "
-        read -r ANSWER
-        if [ "$ANSWER" = "y" ] || [ "$ANSWER" = "Y" ]; then
-            if download_and_install "$DL_URL" "$ZIP_TMP"; then
-                mark_installed "$PLUGIN" "$LATE_ID"
-                UPDATED=$((UPDATED + 1))
-            fi
-        else
-            echo "      Skipped."
-        fi
-
-    elif [ "$UPDATE" = "true" ]; then
-        # Plugin is installed locally but an update is available
-        echo "[!!] $DISP"
-        echo "      Installed : $INST_V"
-        echo "      Latest    : $LATE_V"
-        printf "      Download and install update? [y/N] "
-        read -r ANSWER
-        if [ "$ANSWER" = "y" ] || [ "$ANSWER" = "Y" ]; then
-            if download_and_install "$DL_URL" "$ZIP_TMP"; then
-                mark_installed "$PLUGIN" "$LATE_ID"
-                UPDATED=$((UPDATED + 1))
-            fi
-        else
-            echo "      Skipped."
-        fi
-
-    else
-        echo "[OK]  $DISP ($INST_V)"
+    # Skip takes priority — no output
+    if [ "$ACTION" = "skip" ]; then
+        echo "[SKIP] $DISP"
+        echo ""
+        continue
     fi
+
+    # Determine local state
+    is_locally_installed "$PLUGIN" && IS_NEW=false || IS_NEW=true
+
+    # Nothing to do if up to date and present locally
+    if ! $IS_NEW && [ "$UPDATE" != "true" ]; then
+        echo "[OK]  $DISP ($INST_V)"
+        echo ""
+        continue
+    fi
+
+    # Act based on per-plugin preference
+    case "$ACTION" in
+
+        install)
+            if $IS_NEW; then
+                echo "[AUTO] $DISP ($LATE_V) — installing..."
+            else
+                echo "[AUTO] $DISP — updating $INST_V → $LATE_V..."
+            fi
+            if download_and_install "$DL_URL" "$ZIP_TMP"; then
+                mark_installed "$PLUGIN" "$LATE_ID"
+                UPDATED=$((UPDATED + 1))
+            fi
+            ;;
+
+        download)
+            if $IS_NEW; then
+                echo "[AUTO] $DISP ($LATE_V) — downloading zip..."
+            else
+                echo "[AUTO] $DISP — downloading zip $INST_V → $LATE_V..."
+            fi
+            echo "      Dest: $ZIP_DEST"
+            if curl -fsSL -o "$ZIP_DEST" "$DL_URL"; then
+                echo "      Downloaded."
+                mark_installed "$PLUGIN" "$LATE_ID"
+                UPDATED=$((UPDATED + 1))
+            else
+                echo "      ERROR: Download failed." >&2
+            fi
+            ;;
+
+        ask|*)
+            if $IS_NEW; then
+                echo "[NEW] $DISP ($LATE_V)"
+                printf "      Not installed locally. Download and install? [y/N] "
+            else
+                echo "[!!]  $DISP"
+                echo "      Installed : $INST_V"
+                echo "      Latest    : $LATE_V"
+                printf "      Download and install update? [y/N] "
+            fi
+            read -r ANSWER
+            if [ "$ANSWER" = "y" ] || [ "$ANSWER" = "Y" ]; then
+                if download_and_install "$DL_URL" "$ZIP_TMP"; then
+                    mark_installed "$PLUGIN" "$LATE_ID"
+                    UPDATED=$((UPDATED + 1))
+                fi
+            else
+                echo "      Skipped."
+            fi
+            ;;
+
+    esac
 
     echo ""
 done
