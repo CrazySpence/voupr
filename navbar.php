@@ -8,7 +8,8 @@
 			<a class="navlink" href="list.php">List</a> |
 			<a class="navlink" href="userplugins.php">My Plugins</a> |
 			<a class="navlink" href="upload.php">Upload</a> |
-                        <a class="navlink" href="active.php">In Game</a>
+                        <a class="navlink" href="active.php">In Game</a> |
+                        <a class="navlink" href="csctf.php">CSCTF</a>
 		</td>
 		<td class="spacerone">&#183</td>
 		<? if ($user_loggedin) { ?>
