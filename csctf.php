@@ -30,7 +30,7 @@
 <h3>CSCTF Stats</h3>
 
 <h4>Team Stats</h4>
-<table class="pluginlist">
+<table class="pluginlist" style="margin: 0 auto;">
     <tr class="heading">
         <td>Team</td>
         <td class="number">Captures</td>
@@ -50,7 +50,7 @@
 <br>
 
 <h4>Player Rankings</h4>
-<table class="pluginlist">
+<table class="pluginlist" style="margin: 0 auto;">
     <tr class="heading">
         <td class="number">Rank</td>
         <td>Player</td>
