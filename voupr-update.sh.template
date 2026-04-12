@@ -7,7 +7,7 @@ VOUPR_TOKEN="{{TOKEN}}"
 VOUPR_BASE_URL="{{BASE_URL}}"
 
 # Plugin directory — edit if Vendetta Online is not in /Applications
-PLUGIN_DIR="${PLUGIN_DIR:-/Applications/Vendetta Online.app/Contents/Resources/plugins}"
+PLUGIN_DIR="${PLUGIN_DIR:-/Applications/Vendetta.app/Contents/Resources/plugins}"
 
 # ---------------------------------------------------------------
 # Helpers

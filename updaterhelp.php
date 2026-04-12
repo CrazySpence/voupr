@@ -8,15 +8,15 @@
 <p>The VOUPR updater script checks your plugin list and installs or downloads updates automatically.
 It runs on <strong>macOS</strong>, <strong>Linux</strong>, and <strong>Windows</strong> with no additional software required.</p>
 
-<div class="infobox">
-<h4>Step 1 &mdash; Set Your Download Preferences</h4>
+<div class="infobox" style="max-width: 100%;">
+<h4 class="firsth">Step 1 &mdash; Set Your Download Preferences</h4>
 <p>Go to <a href="userplugins.php">My Plugins</a> and choose a script action for each plugin.
 Hit <em>Save Preferences</em> when done. The script will read these settings each time it runs.</p>
 
-<table class="pluginlist">
+<table class="pluginlist" style="width: 100%;">
 	<tr class="heading">
-		<td>Mode</td>
-		<td>What the script does</td>
+		<td style="width: 13%;">Mode</td>
+		<td style="width: 44%;">What the script does</td>
 		<td>Good for</td>
 	</tr>
 	<tr>
@@ -44,8 +44,8 @@ Hit <em>Save Preferences</em> when done. The script will read these settings eac
 
 <br>
 
-<div class="infobox">
-<h4>Step 2 &mdash; Generate an API Token</h4>
+<div class="infobox" style="max-width: 100%;">
+<h4 class="firsth">Step 2 &mdash; Generate an API Token</h4>
 <p>Go to <a href="settings.php">Settings</a> and click <em>Generate API Token</em>.</p>
 <ul>
 	<li>Your token is shown <strong>once</strong> &mdash; copy it before leaving the page.</li>
@@ -57,8 +57,8 @@ Hit <em>Save Preferences</em> when done. The script will read these settings eac
 
 <br>
 
-<div class="infobox">
-<h4>Step 3 &mdash; Download Your Script</h4>
+<div class="infobox" style="max-width: 100%;">
+<h4 class="firsth">Step 3 &mdash; Download Your Script</h4>
 <p>Go to <a href="settings.php">Settings</a> and click the download link for your operating system.
 The script is generated with your token and site address already filled in.</p>
 <ul>
@@ -71,23 +71,23 @@ The script is generated with your token and site address already filled in.</p>
 
 <br>
 
-<div class="infobox">
-<h4>Step 4 &mdash; Configure &amp; Run</h4>
+<div class="infobox" style="max-width: 100%;">
+<h4 class="firsth">Step 4 &mdash; Configure &amp; Run</h4>
 
 <p><strong>Plugin folder path (all platforms)</strong><br>
 The script defaults to the standard Vendetta Online plugin directory for your OS.
 If you have a non-standard install, either edit the path at the top of the script or set an
 environment variable before running it:</p>
 
-<table class="pluginlist">
+<table class="pluginlist" style="width: 100%;">
 	<tr class="heading">
-		<td>Platform</td>
-		<td>Default path</td>
+		<td style="width: 10%;">Platform</td>
+		<td style="width: 45%;">Default path</td>
 		<td>Override</td>
 	</tr>
 	<tr>
 		<td>macOS</td>
-		<td><code>/Applications/Vendetta Online.app/Contents/Resources/plugins</code></td>
+		<td><code>/Applications/Vendetta.app/Contents/Resources/plugins</code></td>
 		<td><code>PLUGIN_DIR="/your/path" bash voupr-update.sh</code></td>
 	</tr>
 	<tr>
@@ -106,7 +106,8 @@ environment variable before running it:</p>
 
 <p><strong>Windows</strong></p>
 <ol>
-	<li>Open <strong>PowerShell</strong> (search for it in the Start menu).</li>
+	<li>Right-click <strong>PowerShell</strong> in the Start menu and choose <strong>Run as administrator</strong>.
+		This is required so the script can write to the Program Files plugin folder.</li>
 	<li>Unblock the downloaded script so Windows will run it:
 		<br><code>Unblock-File -Path .\voupr-update.ps1</code>
 		<br><em>This removes the internet-download flag from this file only and does not change any system security settings.</em></li>
@@ -119,7 +120,7 @@ environment variable before running it:</p>
 <p><strong>macOS &amp; Linux</strong></p>
 <p>Open a terminal and run the script directly with bash:</p>
 <p><code>bash voupr-update.sh</code></p>
-<p>Or make it executable so you can run it without <code>bash</code> each time:</p>
+<p>Or make it executable once so you can run it without typing <code>bash</code> each time:</p>
 <p><code>chmod +x voupr-update.sh</code><br>
 <code>./voupr-update.sh</code></p>
 
