@@ -29,6 +29,12 @@
 
 <h3>CSCTF Stats</h3>
 
+<p style="text-align: center;">
+    CSCTF is a Capture the Flag game mode for Vendetta Online, played in teams.<br>
+    Capture enemy flags, rack up kills, and lead your team to victory.<br>
+    <a href="plugin.php?name=csctf">Download the CSCTF plugin</a>
+</p>
+
 <h4 style="text-align: center;">Team Stats</h4>
 <table class="pluginlist" style="margin: 0 auto;">
     <tr class="heading">
