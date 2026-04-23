@@ -43,6 +43,7 @@ Registering will allow you to:
 		</div>
 	<? } ?>
 	<form name="register" method="post" action="doregister.php">
+		<input type="hidden" name="csrf_token" value="<?=$_SESSION['csrf_token']?>">
 		<table class="input">
 			<tr>
 				<td class="label">Username:</td>

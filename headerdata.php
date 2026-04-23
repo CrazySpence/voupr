@@ -1,5 +1,5 @@
 <?
 	$page_title = TRUE;
 	require('userauth.php');
-	$SERVER = $_SERVER['SERVER_NAME'];
+	$SERVER = 'https://' . $_SERVER['SERVER_NAME'] . '/';
 ?>

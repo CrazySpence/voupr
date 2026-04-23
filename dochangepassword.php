@@ -4,6 +4,8 @@
 <? require('userauth.php'); ?>
 
 <?
+	csrf_verify();
+
 	// Check login
 	$post_login = 'settings.php';
 	require('loggedin.php');
@@ -15,7 +17,7 @@
 	$newpass2 = $_POST['confirmpassword'];
 	
 	// Check old password
-	if (!password_match($username, md5($oldpass))) { $badoldpass = TRUE; }
+	if (!password_match($username, $oldpass)) { $badoldpass = TRUE; }
 	
 	// Check password match
 	if ($newpass != $newpass2) { $passmismatch = TRUE; }
@@ -35,8 +37,7 @@
 		$redirect_url = substr($url, 0, -1);
 		include('redirect.php');
 	} else {
-		$query = 'UPDATE users SET password="'.md5($newpass).'" WHERE username="'.$user_sname.'"';
-		mysqli_query($db,$query);
+		db_run('UPDATE users SET password=? WHERE username=?', 'ss', password_hash($newpass, PASSWORD_DEFAULT), $user_sname);
 	?>
 	
 		<? $page_title = 'Password Updated - VOUPR'; ?>

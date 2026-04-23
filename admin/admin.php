@@ -7,8 +7,7 @@
 <? if (!$admin) { $admin = TRUE;
 	/////////////////////////////////////////////////////////
 	
-	$query = 'SELECT admin FROM users WHERE username="'.$user_sname.'"';
-	$result = mysqli_query($db,$query);
+	$result = db_run('SELECT admin FROM users WHERE username=?', 's', $user_sname);
 	$row = mysqli_fetch_array($result);
 	if ($row['admin'] != TRUE) { $redirect_url = '../404error.php'; require('../redirect.php'); }
 } ?>

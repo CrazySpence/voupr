@@ -1,0 +1,199 @@
+# VOUPR Plugin Updater (Windows / PowerShell)
+# Keep this file private -it contains your API token.
+#
+# REQUIREMENTS: PowerShell 5.0 or later (Windows 10/11 ship with 5.1).
+#
+# EXECUTION POLICY:
+#   If you see "running scripts is disabled", unblock just this file:
+#       Unblock-File -Path .\voupr-update.ps1
+#   Then re-run normally. This removes the internet-download flag from this
+#   file only and does not change any system-wide security settings.
+#
+# Run with:
+#   powershell -File voupr-update.ps1
+
+#Requires -Version 5
+
+$VouprToken   = '{{TOKEN}}'
+$VouprBaseUrl = '{{BASE_URL}}'
+
+# Plugin directory -edit if Vendetta Online is installed elsewhere,
+# or set $env:PLUGIN_DIR before running.
+$PluginDir = if ($env:PLUGIN_DIR) {
+    $env:PLUGIN_DIR
+} else {
+    'C:\Program Files (x86)\Vendetta Online\plugins'
+}
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+function Test-PluginInstalled {
+    param([string]$PluginId)
+    $dirs = Get-ChildItem -Path $PluginDir -Directory -ErrorAction SilentlyContinue
+    $match = $dirs | Where-Object { $_.Name.ToLower() -eq $PluginId.ToLower() }
+    return ($null -ne $match)
+}
+
+function Install-Plugin {
+    param([string]$Url, [string]$ZipPath)
+    Write-Host "      URL : $Url"
+    Write-Host "      Zip : $ZipPath"
+    try {
+        Invoke-WebRequest -Uri $Url -OutFile $ZipPath -UseBasicParsing -ErrorAction Stop
+    } catch {
+        Write-Host "      ERROR: Download failed. $_" -ForegroundColor Red
+        return $false
+    }
+    Write-Host "      Extracting..."
+    try {
+        Expand-Archive -Path $ZipPath -DestinationPath $PluginDir -Force -ErrorAction Stop
+    } catch {
+        Write-Host "      ERROR: Extraction failed. $_" -ForegroundColor Red
+        Remove-Item -Path $ZipPath -Force -ErrorAction SilentlyContinue
+        return $false
+    }
+    Remove-Item -Path $ZipPath -Force -ErrorAction SilentlyContinue
+    Write-Host "      Done."
+    return $true
+}
+
+function Mark-Installed {
+    param([string]$Plugin, [int]$VersionId)
+    $body = @{ token = $VouprToken; plugin = $Plugin; version = $VersionId }
+    try {
+        Invoke-WebRequest -Method Post -Uri "$VouprBaseUrl/domarkinstalled.php" `
+            -Body $body -UseBasicParsing -ErrorAction Stop | Out-Null
+    } catch {
+        Write-Error "Warning: could not sync install status to VOUPR: $_"
+    }
+}
+
+# ---------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------
+
+if (-not (Test-Path -Path $PluginDir -PathType Container)) {
+    Write-Host "WARNING: Plugin directory not found: $PluginDir"
+    Write-Host "         Set `$env:PLUGIN_DIR to override."
+    Write-Host ""
+}
+
+Write-Host "Fetching plugin list from VOUPR..."
+
+try {
+    $response = Invoke-RestMethod -Uri "$VouprBaseUrl/api/myplugins.json.php?token=$VouprToken" `
+        -UseBasicParsing -ErrorAction Stop
+} catch {
+    Write-Host "ERROR: Failed to reach VOUPR. Check your internet connection." -ForegroundColor Red
+    Write-Host "       $_"
+    exit 1
+}
+
+if ($response.error) {
+    Write-Host "ERROR: API error: $($response.error)" -ForegroundColor Red
+    exit 1
+}
+
+$plugins = $response.plugins
+$count   = $plugins.Count
+
+if ($count -eq 0) {
+    Write-Host "No plugins tracked on VOUPR. Visit $VouprBaseUrl to add plugins."
+    exit 0
+}
+
+Write-Host "Checking $count plugin(s)..."
+Write-Host ""
+
+$updated = 0
+
+foreach ($p in $plugins) {
+    $pluginId  = $p.plugin
+    $dispName  = $p.dispname
+    $instV     = $p.installed_version
+    $latestV   = $p.latest_version
+    $latestId  = [int]$p.latest_id
+    $hasUpdate = [bool]$p.update_available
+    $action    = $p.update_action
+
+    $dlUrl   = "$VouprBaseUrl/downloads/$pluginId-$latestV.zip"
+    $zipTmp  = Join-Path $env:TEMP "$pluginId-$latestV.zip"
+    $zipDest = Join-Path $PluginDir "$pluginId-$latestV.zip"
+
+    # Skip takes priority
+    if ($action -eq 'skip') {
+        Write-Host "[SKIP] $dispName"
+        Write-Host ""
+        continue
+    }
+
+    $isNew = -not (Test-PluginInstalled -PluginId $pluginId)
+
+    # Nothing to do if up to date and present locally
+    if (-not $isNew -and -not $hasUpdate) {
+        Write-Host "[OK]  $dispName ($instV)"
+        Write-Host ""
+        continue
+    }
+
+    switch ($action) {
+
+        'install' {
+            if ($isNew) {
+                Write-Host "[AUTO] $dispName ($latestV) - installing..."
+            } else {
+                Write-Host "[AUTO] $dispName - updating $instV -> $latestV..."
+            }
+            if (Install-Plugin -Url $dlUrl -ZipPath $zipTmp) {
+                Mark-Installed -Plugin $pluginId -VersionId $latestId
+                $updated++
+            }
+        }
+
+        'download' {
+            if ($isNew) {
+                Write-Host "[AUTO] $dispName ($latestV) - downloading zip..."
+            } else {
+                Write-Host "[AUTO] $dispName - downloading zip $instV -> $latestV..."
+            }
+            Write-Host "      Dest: $zipDest"
+            try {
+                Invoke-WebRequest -Uri $dlUrl -OutFile $zipDest -UseBasicParsing -ErrorAction Stop
+                Write-Host "      Downloaded."
+                Mark-Installed -Plugin $pluginId -VersionId $latestId
+                $updated++
+            } catch {
+                Write-Host "      ERROR: Download failed. $_" -ForegroundColor Red
+            }
+        }
+
+        default {
+            # 'ask' or any unknown value -prompt the user
+            if ($isNew) {
+                Write-Host "[NEW] $dispName ($latestV)"
+                $answer = Read-Host "      Not installed locally. Download and install? [y/N]"
+            } else {
+                Write-Host "[!!]  $dispName"
+                Write-Host "      Installed : $instV"
+                Write-Host "      Latest    : $latestV"
+                $answer = Read-Host "      Download and install update? [y/N]"
+            }
+            if ($answer -eq 'y' -or $answer -eq 'Y') {
+                if (Install-Plugin -Url $dlUrl -ZipPath $zipTmp) {
+                    Mark-Installed -Plugin $pluginId -VersionId $latestId
+                    $updated++
+                }
+            } else { Write-Host "      Skipped." }
+        }
+    }
+
+    Write-Host ""
+}
+
+if ($updated -gt 0) {
+    Write-Host "$updated plugin(s) installed/updated."
+} else {
+    Write-Host "No changes made."
+}

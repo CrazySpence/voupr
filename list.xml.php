@@ -10,12 +10,15 @@
 	if ($_GET['sort'] == 'name') { $sort = 'longname ASC'; }
 	if ($_GET['sort'] == 'rating') { $sort = 'rating DESC'; }
 	if ($_GET['sort'] == 'users') { $sort = 'users DESC'; }
+	$condition_sql = '';
+	$condition_params = [];
+	$condition_types = '';
 	require('pluginlist.php');
 	
 	// Create XML
 	add('<?xml version="1.0"?>');
 	add('<plugins>');
-	while($row = mysql_fetch_array($result))
+	while($row = mysqli_fetch_array($result))
 	{
 		add('	<plugin>');
 		add('		<name>'.desafe($row['name']).'</name>');

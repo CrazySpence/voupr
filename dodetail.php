@@ -3,9 +3,11 @@
 	require('database.php');
 	require('utilities.php');
 
+	csrf_verify();
+
 	// Get form variables
-	$plugin = safe($_POST['plugin']);
-	$longdesc = safe($_POST['longdesc']);
+	$plugin = $_POST['plugin'];
+	$longdesc = $_POST['longdesc'];
 	
 	// Check plugin name
 	if (!pluginexists($plugin)) { error('Plugin does not exist'); }
@@ -20,8 +22,7 @@
 	
 	
 	// Do stuff
-	$query = 'UPDATE plugins SET longdesc="'.$longdesc.'" WHERE name="'.$plugin.'"';
-	mysqli_query($db,$query);
+	db_run('UPDATE plugins SET longdesc=? WHERE name=?', 'ss', $longdesc, $plugin);
 	
 	// Go to plugin page
 	$redirect_url = 'editplugin.php?plugin='.$plugin.'';

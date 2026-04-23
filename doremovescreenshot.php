@@ -5,9 +5,11 @@
 <? require('utilities.php'); ?>
 
 <?
+	csrf_verify();
+
 	// Get form variables
-	$plugin = mysqli_real_escape_string($db,$_GET['plugin']);
-	$number = intval($_GET['number']);
+	$plugin = $_POST['plugin'];
+	$number = intval($_POST['number']);
 	
 	// Check plugin name
 	if (!pluginexists($plugin)) { error('Plugin does not exist'); }

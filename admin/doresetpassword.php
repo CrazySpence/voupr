@@ -7,8 +7,10 @@
 <? require('admin.php'); ?>
 
 <?
+	csrf_verify();
+
 	// Get form variables
-	$user = safe($_POST['user']);
+	$user = $_POST['user'];
 	$password = $_POST['password'];
 	
 	// Check password
@@ -27,8 +29,7 @@
 		$redirect_url = substr($url, 0, -1);
 		require('../redirect.php');
 	} else {
-		$query = 'UPDATE users SET password="'.md5($password).'" WHERE username="'.$user.'"';
-		mysqli_query($db,$query);
+		db_run('UPDATE users SET password=? WHERE username=?', 'ss', password_hash($password, PASSWORD_DEFAULT), $user);
 		
 		// Return to page
 		$redirect_url = 'resetpassword.php?success=TRUE';

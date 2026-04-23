@@ -6,9 +6,11 @@
 <? require('session.php'); ?>
 
 <?
+	csrf_verify();
+
 	// Get form variables
-	$plugin = mysqli_real_escape_string($db,strtolower($_GET['plugin']));
-	$user = mysqli_real_escape_string($db,$_GET['user']);
+	$plugin = strtolower($_POST['plugin']);
+	$user = $_POST['user'];
 	
 	// Require login
 	$post_login = 'doremovemanager.php?plugin='.$plugin.'&user='.$user;
@@ -24,8 +26,7 @@
 	if (!userismanager($user, $plugin)) { $badusername = TRUE; }
 	
 	// Check number of managers
-	$query = 'SELECT COUNT(username) AS num FROM managers WHERE pluginname="'.$plugin.'"';
-	$result = mysqli_query($db,$query);
+	$result = db_run('SELECT COUNT(username) AS num FROM managers WHERE pluginname=?', 's', $plugin);
 	$row = mysqli_fetch_array($result);
 	if ($row['num'] == '1') { $lastmanager = TRUE; }
 
@@ -41,11 +42,7 @@
 		$redirect_url = substr($url, 0, -1);
 		require('redirect.php');
 	} else {
-		// Set variables
-		$plugin = $plugin;
-		$user = $user;
-		$query = 'DELETE FROM managers WHERE username="'.$user.'" AND pluginname="'.$plugin.'"';
-		mysqli_query($db,$query);
+		db_run('DELETE FROM managers WHERE username=? AND pluginname=?', 'ss', $user, $plugin);
 		
 		// Return to edit page
 		if ($user != $user_sname)

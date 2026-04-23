@@ -44,7 +44,13 @@
 				) AS table2
 				WHERE table2.name=table1.name
 			) AS table3
-			WHERE true '.$condition;
-			if ($sort) { $query = $query.' ORDER BY '.$sort; }
-	$result = mysqli_query($db,$query);
+			WHERE true ' . ($condition_sql ?? '');
+	$allowed_sorts = ['longname ASC', 'rating DESC', 'users DESC'];
+	if (!isset($sort) || !in_array($sort, $allowed_sorts, true)) { $sort = 'longname ASC'; }
+	$query .= ' ORDER BY ' . $sort;
+	if (!empty($condition_params)) {
+		$result = db_run($query, $condition_types, ...$condition_params);
+	} else {
+		$result = db_run($query);
+	}
 ?>

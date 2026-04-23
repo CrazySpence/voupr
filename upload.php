@@ -22,14 +22,16 @@
 		<td>Upload</td>
 	</tr>
 	<?
-		$query = 'SELECT plugins.*, MAX(versions.id) AS versionid
-			FROM plugins, versions, managers
-			WHERE managers.username="'.$user_name.'"
-			AND plugins.name=managers.pluginname
-			AND versions.plugin=plugins.name
-			GROUP BY plugins.name
-			ORDER BY plugins.longname ASC';
-		$result = mysqli_query($db,$query);
+		$result = db_run(
+			'SELECT plugins.*, MAX(versions.id) AS versionid
+			 FROM plugins, versions, managers
+			 WHERE managers.username=?
+			 AND plugins.name=managers.pluginname
+			 AND versions.plugin=plugins.name
+			 GROUP BY plugins.name
+			 ORDER BY plugins.longname ASC',
+			's', $user_name
+		);
 	?>
 	
 	<? while($row = mysqli_fetch_array($result)) { ?>

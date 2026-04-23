@@ -6,12 +6,6 @@
 <? if (!$utilities) { $utilities = TRUE;
 	/////////////////////////////////////////////////////////
 	
-	function safe ($string)
-	{
-		global $db;
-		return mysqli_real_escape_string($db,$string);
-	}
-	
 	function desafe ($string)
 	{
 		$string = str_replace('\\\'', '\'', $string);
@@ -30,61 +24,48 @@
 	
 	function getuserdispname ($username)
 	{
-		global $db;
-		$query = 'SELECT longname FROM users WHERE username="'.$username.'"';
-		$result = mysqli_query($db,$query);
+		$result = db_run('SELECT longname FROM users WHERE username=?', 's', $username);
 		$row = mysqli_fetch_array($result);
 		return $row['longname'];
 	}
-	
+
 	function getversionid ($plugin, $versionstring)
 	{
-		global $db;
-		$query = 'SELECT id FROM versions WHERE plugin="'.$plugin.'" AND versionstring="'.$versionstring.'"';
-		$result = mysqli_query($db,$query);
+		$result = db_run('SELECT id FROM versions WHERE plugin=? AND versionstring=?', 'ss', $plugin, $versionstring);
 		$row = mysqli_fetch_array($result);
 		return $row['id'];
 	}
-	
+
 	function vlink ($id)
 	{
-		global $db;
+		$id = intval($id);
 		// Get current
-		$id = mysqli_real_escape_string($db,$id);
-		$query = 'SELECT versionstring, id FROM versions WHERE id="'.$id.'"';
-		$result = mysqli_query($db,$query);
+		$result = db_run('SELECT versionstring, id FROM versions WHERE id=?', 'i', $id);
 		$row = mysqli_fetch_array($result);
 		$version = $row['versionstring'];
 		$versionid = $id;
 		// Get latest
-		$query = 'SELECT versionstring, id
-				FROM versions WHERE id=
-					(SELECT MAX(id) FROM versions WHERE plugin=(SELECT plugin FROM versions WHERE id="'.$id.'"))';
-		$result = mysqli_query($db,$query);
+		$result = db_run(
+			'SELECT versionstring, id FROM versions WHERE id=(SELECT MAX(id) FROM versions WHERE plugin=(SELECT plugin FROM versions WHERE id=?))',
+			'i', $id
+		);
 		$row = mysqli_fetch_array($result);
-		$latest = $row['versionstring'];
 		$latestid = $row['id'];
 		// Output
-		if ($id == $latestid) { $oldnew = 'newversion'; }
-		else { $oldnew = 'oldversion'; }
-		$link = '<a class="'.$oldnew.'" href="version.php?id='.$versionid.'">'.$version.'</a>';
-		return $link;
+		$oldnew = ($id == $latestid) ? 'newversion' : 'oldversion';
+		return '<a class="'.$oldnew.'" href="version.php?id='.$versionid.'">'.$version.'</a>';
 	}
-	
+
 	function getnumusers ($plugin)
 	{
-		global $db;
-		$query = 'SELECT COUNT(user) AS numusers FROM installed WHERE plugin="'.$plugin.'"';
-		$result = mysqli_query($db,$query);
+		$result = db_run('SELECT COUNT(user) AS numusers FROM installed WHERE plugin=?', 's', $plugin);
 		$row = mysqli_fetch_array($result);
 		return $row['numusers'];
 	}
-	
+
 	function getrating ($plugin)
 	{
-		global $db;
-		$query = 'SELECT AVG(rating) AS rating FROM ratings WHERE plugin="'.$plugin.'"';
-		$result = mysqli_query($db,$query);
+		$result = db_run('SELECT AVG(rating) AS rating FROM ratings WHERE plugin=?', 's', $plugin);
 		if ($row = mysqli_fetch_array($result)) {
 			return(printrating($row['rating']));
 		} else {
@@ -112,40 +93,22 @@
 	
 	function userismanager ($user, $plugin)
 	{
-		global $db;
-		$yesno = FALSE;
-		$query = 'SELECT username FROM managers WHERE pluginname="'.$plugin.'" AND username="'.$user.'"';
-		$result = mysqli_query($db,$query);
-		if (mysqli_fetch_array($result)) { $yesno = TRUE; }
-		return $yesno;
+		$result = db_run('SELECT username FROM managers WHERE pluginname=? AND username=?', 'ss', $plugin, $user);
+		return (bool) mysqli_fetch_array($result);
 	}
-	
+
 	function pluginexists ($plugin)
 	{
-		global $db;
-		$yesno = TRUE;
-		if (strlen($plugin) == 0) { $yesno = FALSE; }
-		else
-		{
-			$query = 'SELECT name FROM plugins WHERE name="'.$plugin.'"';
-			$result = mysqli_query($db,$query);
-			if (!mysqli_fetch_array($result)) { $yesno = FALSE; }
-		}
-		return $yesno;
+		if (strlen($plugin) == 0) { return FALSE; }
+		$result = db_run('SELECT name FROM plugins WHERE name=?', 's', $plugin);
+		return (bool) mysqli_fetch_array($result);
 	}
-	
+
 	function userexists ($user)
 	{
-		global $db;
-		$yesno = TRUE;
-		if (strlen($user) == 0) { $yesno = FALSE; }
-		else
-		{
-			$query = 'SELECT username FROM users WHERE username="'.$user.'"';
-			$result = mysqli_query($db,$query);
-			if (!mysqli_fetch_array($result)) { $yesno = FALSE; }
-		}
-		return $yesno;
+		if (strlen($user) == 0) { return FALSE; }
+		$result = db_run('SELECT username FROM users WHERE username=?', 's', $user);
+		return (bool) mysqli_fetch_array($result);
 	}
 	
 	function error ($error)

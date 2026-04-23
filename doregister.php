@@ -10,15 +10,16 @@
         use PHPMailer\PHPMailer\SMTP;
         use PHPMailer\PHPMailer\Exception;
         require 'vendor/autoload.php';
+	csrf_verify();
+
 	// Get form variables
-	$username = mysqli_real_escape_string($db,strtolower($_POST['username']));
-	$email = mysqli_real_escape_string($db,strtolower($_POST['email']));
+	$username = strtolower($_POST['username']);
+	$email = strtolower($_POST['email']);
 	$pass1 = $_POST['password'];
 	$pass2 = $_POST['passcheck'];
 	
 	// Check username
-	$query = 'SELECT * FROM users WHERE username="'.$username.'"';
-	$result = mysqli_query($db,$query);
+	$result = db_run('SELECT * FROM users WHERE username=?', 's', $username);
 	if (mysqli_fetch_array($result)) { $badusername = TRUE; }
 	
 	// Check password
@@ -26,8 +27,7 @@
 	if ($pass1 != $pass2) { $diffpasswords = TRUE; }
 	
 	// Check email
-	$query = 'SELECT * FROM users WHERE email="'.$email.'"';
-	$result = mysqli_query($db,$query);
+	$result = db_run('SELECT * FROM users WHERE email=?', 's', $email);
 	if (mysqli_fetch_array($result)) { $dupemail = TRUE; }
 	else if (!($badusername or $badpassword or $diffpasswords))
 	{
@@ -69,12 +69,11 @@
 
 	<?
 		// Create account
-		$username = $username;
 		$password = $pass1;
-		$email = $email;
-		$longname = $username;
-		$query = 'INSERT INTO users (username, password, email, longname, created, confirmed) VALUES ("'.$username.'", "'.md5($password).'", "'.$email.'", "'.$longname.'", CURDATE(), FALSE)';
-		mysqli_query($db,$query);
+		db_run(
+			'INSERT INTO users (username, password, email, longname, created, confirmed) VALUES (?, ?, ?, ?, CURDATE(), FALSE)',
+			'ssss', $username, password_hash($password, PASSWORD_DEFAULT), $email, $username
+		);
 	?>
 	
 	<? $page_title = $longname.'Registration Succesfull - VOUPR'; ?>

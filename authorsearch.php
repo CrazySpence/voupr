@@ -2,19 +2,21 @@
 
 <?
 	// Get search and sort
-	$author = mysqli_real_escape_string($db,$_GET['author']);
+	$author = $_GET['author'];
 	$sort = 'longname ASC';
 	if ($_GET['sort'] == 'name') { $sort = 'longname ASC'; }
 	if ($_GET['sort'] == 'rating') { $sort = 'rating DESC'; }
 	if ($_GET['sort'] == 'users') { $sort = 'users DESC'; }
-	
+
 	// Import modules
 	$page_title = $author.'\'s Plugins';
 	require('database.php');
 	require('utilities.php');
-	
-	// Get results
-	$condition = ' AND (authors LIKE "%'.$author.'%")';
+
+	// Build parameterized author condition
+	$condition_sql = ' AND (authors LIKE ?)';
+	$condition_params = ['%' . $author . '%'];
+	$condition_types = 's';
 	require('pluginlist.php');
 ?>
 

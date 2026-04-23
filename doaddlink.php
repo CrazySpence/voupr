@@ -6,9 +6,11 @@
 <? require('utilities.php'); ?>
 
 <?
+	csrf_verify();
+
 	// Get form variables
-	$plugin = safe(strtolower($_POST['plugin']));
-	$type = safe($_POST['type']);
+	$plugin = strtolower($_POST['plugin']);
+	$type = intval($_POST['type']);
 	$title = $_POST['title'];
 	$link = $_POST['link'];
 	
@@ -23,7 +25,7 @@
 	if (!ismanager($plugin)) { error('You do not have permission to perform this operation'); }
 	
 	// Check type
-	if ($type != '0' and $type != '1' and $type != '2' and $type != '3') { error('Invalid link type.'); }
+	if ($type < 0 or $type > 3) { error('Invalid link type.'); }
 	
 	// Check title
 	if ($title == '') { $badtitle = TRUE; }
@@ -40,8 +42,7 @@
 		require('redirect.php');
 	} else {
 		// Add link to database
-		$query = 'INSERT INTO links (plugin, type, title, link) VALUES ("'.$plugin.'", "'.$type.'", "'.$title.'", "'.$link.'")';
-		mysqli_query($db,$query);
+		db_run('INSERT INTO links (plugin, type, title, link) VALUES (?, ?, ?, ?)', 'siss', $plugin, $type, $title, $link);
 	
 		// Return to edit page
 		$redirect_url = 'editplugin.php?plugin='.$plugin;

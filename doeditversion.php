@@ -5,13 +5,14 @@
 <? require('utilities.php'); ?>
 
 <?
+	csrf_verify();
+
 	// Get form variables
 	$id = intval($_POST['id']);
-	$description = mysqli_real_escape_string($db,$_POST['description']);
+	$description = $_POST['description'];
 	
 	// Get plugin name
-	$query = 'SELECT plugin FROM versions WHERE id="'.$id.'"';
-	$result = mysqli_query($db,$query);
+	$result = db_run('SELECT plugin FROM versions WHERE id=?', 'i', $id);
 	$row = mysqli_fetch_array($result);
 	$plugin = $row['plugin'];
 	
@@ -21,8 +22,7 @@
 	if (!ismanager($plugin)) { error('You do not have permission to perform this action.'); }
 	
 	// Do stuff
-	$query = 'UPDATE versions SET description="'.$description.'" WHERE id="'.$id.'"';
-	mysqli_query($db,$query);
+	db_run('UPDATE versions SET description=? WHERE id=?', 'si', $description, $id);
 	
 	$redirect_url = 'version.php?id='.$id.'';
 	require('redirect.php');

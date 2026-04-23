@@ -70,6 +70,7 @@
 		</div>
 	<? } ?>
 	<form name="newversion" method="post" action="donewversion.php" enctype="multipart/form-data">
+		<input type="hidden" name="csrf_token" value="<?=$_SESSION['csrf_token']?>">
 		<table class="input">
 			<tr>
 				<td class="label">Plugin:</td>
